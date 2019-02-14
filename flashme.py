@@ -1,35 +1,51 @@
 #!/usr/bin/env python3
 
+import time
+
 # pylint:disable=too-few-public-methods
 class FlashCard:
-    def __init__(self, front, back, box=0):
+    def __init__(self, front, back, **kwargs):
         self.front = front
         self.back = back
-        self.box = box
+        self.box = kwargs['box'] if 'box' in kwargs else 0
+        self.timestamp = kwargs['timestamp'] if 'timestamp' in kwargs else 0
 
 class Deck:
-    box_count = 5
+    default_expiries = [(60 * 60 * 24) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
 
     def __init__(self, filename=""):
+        self.box_count = 6
+        self.max_box_num = self.box_count - 1
         self.filename = filename
-        self.boxes = [[] for _ in range(Deck.box_count)]
+        self.boxes = [[] for _ in range(self.box_count)]
         self.current_box = 0
 
     def insert_card(self, card, box):
-        if box < Deck.box_count:
+        if box < self.box_count:
             card.box = box
             self.boxes[box].append(card)
 
     def restart(self):
         self.current_box = 0
 
+    def card_expired(self, card, **kwargs):
+        expiries = kwargs['expiries'] if 'expiries' in kwargs else Deck.default_expiries
+        assert len(expiries) == self.box_count
+        time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else self.time_fun_impl
+        return time_fun() - card.timestamp >= expiries[card.box]
+
     def get_next_card(self):
         next_card = None
-        while self.current_box < Deck.box_count:
+        starting_box = self.current_box
+        while True:
             if self.boxes[self.current_box]:
-                next_card = self.boxes[self.current_box].pop(0)
+                if self.card_expired(self.boxes[self.current_box][0]):
+                    next_card = self.boxes[self.current_box].pop(0)
                 break
-            self.current_box += 1
+            else:
+                self.current_box = (self.current_box + 1) % self.box_count
+                if self.current_box == starting_box:
+                    break
         return next_card
 
     def wrong(self, card):
@@ -37,6 +53,10 @@ class Deck:
         self.boxes[0].append(card)
 
     def right(self, card):
-        if card.box < Deck.box_count - 1:
+        if card.box < self.box_count - 1:
             card.box += 1
         self.boxes[card.box].append(card)
+
+    def time_fun_impl(self):
+        return time.time()
+
