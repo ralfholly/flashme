@@ -13,10 +13,13 @@ class FlashCard:
 class Deck:
     default_expiries = [(60 * 60 * 24) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
 
-    def __init__(self, filename=""):
+    def __init__(self, expiries=default_expiries, filename=""):
         self.box_count = 6
         self.max_box_num = self.box_count - 1
+        self.expiries = expiries
         self.filename = filename
+
+        assert len(expiries) == self.box_count
         self.boxes = [[] for _ in range(self.box_count)]
         self.current_box = 0
 
@@ -29,24 +32,20 @@ class Deck:
         self.current_box = 0
 
     def card_expired(self, card, **kwargs):
-        expiries = kwargs['expiries'] if 'expiries' in kwargs else Deck.default_expiries
-        assert len(expiries) == self.box_count
         time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else self.time_fun_impl
-        return time_fun() - card.timestamp >= expiries[card.box]
+        return time_fun() - card.timestamp >= self.expiries[card.box]
 
     def get_next_card(self):
-        next_card = None
         starting_box = self.current_box
         while True:
-            if self.boxes[self.current_box]:
-                if self.card_expired(self.boxes[self.current_box][0]):
-                    next_card = self.boxes[self.current_box].pop(0)
+            for index, card in enumerate(self.boxes[self.current_box]):
+                if self.card_expired(card):
+                    self.boxes[self.current_box].pop(index)
+                    return card
+            self.current_box = (self.current_box + 1) % self.box_count
+            if self.current_box == starting_box:
                 break
-            else:
-                self.current_box = (self.current_box + 1) % self.box_count
-                if self.current_box == starting_box:
-                    break
-        return next_card
+        return None
 
     def wrong(self, card):
         card.box = 0
@@ -57,6 +56,6 @@ class Deck:
             card.box += 1
         self.boxes[card.box].append(card)
 
+    #pylint:disable=no-self-use
     def time_fun_impl(self):
         return time.time()
-
