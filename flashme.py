@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+#   __ _           _
+#  / _| | __ _ ___| |__  _ __ ___   ___
+# | |_| |/ _` / __| '_ \| '_ ` _ \ / _ \
+# |  _| | (_| \__ \ | | | | | | | |  __/
+# |_| |_|\__,_|___/_| |_|_| |_| |_|\___|
+#
+
 import time
 
 # pylint:disable=too-few-public-methods
@@ -49,13 +56,15 @@ class Deck:
 
     def wrong(self, card):
         card.box = 0
+        card.timestamp = self.time_fun_impl()
         self.boxes[0].append(card)
 
     def right(self, card):
         if card.box < self.box_count - 1:
             card.box += 1
+        card.timestamp = self.time_fun_impl()
         self.boxes[card.box].append(card)
 
-    #pylint:disable=no-self-use
     def time_fun_impl(self):
+        self = self
         return time.time()

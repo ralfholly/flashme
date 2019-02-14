@@ -65,8 +65,10 @@ class TestFlashMe(unittest.TestCase):
         self.assertEqual(3, card.box)
         deck.wrong(card)
         self.assertEqual(0, card.box)
+        card.timestamp = 0
         deck.restart()
         card = deck.get_next_card()
+        card.timestamp = 0
         self.assertEqual(0, card.box)
         self.assertEqual("q3", card.front)
 
@@ -76,11 +78,13 @@ class TestFlashMe(unittest.TestCase):
         card = deck.get_next_card()
         self.assertEqual(3, card.box)
         deck.right(card)
+        card.timestamp = 0
         card = deck.get_next_card()
         self.assertEqual(4, card.box)
         self.assertEqual("q3", card.front)
         # Cannot promote card beyond last box.
         deck.right(card)
+        card.timestamp = 0
         self.assertEqual(5, card.box)
         self.assertEqual("q3", card.front)
 
@@ -105,3 +109,78 @@ class TestFlashMe(unittest.TestCase):
         self.assertFalse(deck.card_expired(c3, expiries=expiries, time_fun=lambda: 1000 + 9999))
         self.assertTrue(deck.card_expired(c3, expiries=expiries, time_fun=lambda: 1000 + 10000))
         self.assertTrue(deck.card_expired(c3, expiries=expiries, time_fun=lambda: 1000 + 100000))
+
+    def test_simple_session(self):
+        expiries = [0, 1, 2, 3, 4, 100]
+        deck = Deck(expiries)
+        deck.time_fun_impl = lambda: 1000
+        self.assertEqual(None, deck.get_next_card())
+        deck.insert_card(FlashCard("q1", "a1", timestamp=1000), 0)
+
+        # Card in box 0, right answer, move to 1
+        deck.time_fun_impl = lambda: 1001
+        card = deck.get_next_card()
+        self.assertEqual("q1", card.front)
+        deck.wrong(card)
+        self.assertEqual(1001, card.timestamp)
+        card = deck.get_next_card()
+        self.assertEqual("q1", card.front)
+        self.assertEqual(1001, card.timestamp)
+        deck.time_fun_impl = lambda: 1002
+        deck.right(card)
+        self.assertEqual(1, card.box)
+        self.assertEqual(1002, card.timestamp)
+
+        # Card now in box 1, right answer, move to 2
+        card = deck.get_next_card()
+        self.assertEqual(None, deck.get_next_card())
+        # .. Expire
+        deck.time_fun_impl = lambda: 1003
+        card = deck.get_next_card()
+        self.assertEqual("q1", card.front)
+        deck.right(card)
+        self.assertEqual(2, card.box)
+        self.assertEqual(1003, card.timestamp)
+
+        # Card now in box 2, wrong answer, move to 0
+        card = deck.get_next_card()
+        self.assertEqual(None, deck.get_next_card())
+        deck.time_fun_impl = lambda: 1004
+        card = deck.get_next_card()
+        self.assertEqual(None, deck.get_next_card())
+        deck.time_fun_impl = lambda: 1005
+        card = deck.get_next_card()
+        self.assertEqual("q1", card.front)
+        deck.wrong(card)
+        self.assertEqual(0, card.box)
+        self.assertEqual(1005, card.timestamp)
+
+        # Card now in box 0, wrong answer, stay in box 0
+        card = deck.get_next_card()
+        self.assertEqual("q1", card.front)
+        deck.wrong(card)
+        self.assertEqual(0, card.box)
+        self.assertEqual(1005, card.timestamp)
+
+    def test_dont_move_beyond_last_box(self):
+        expiries = [0, 1, 2, 3, 4, 100]
+        deck = Deck(expiries)
+        deck.time_fun_impl = lambda: 1000
+        self.assertEqual(None, deck.get_next_card())
+        deck.insert_card(FlashCard("q1", "a1", timestamp=1000), 4)
+
+        # Card in box 4, right answer, move to 5
+        deck.time_fun_impl = lambda: 1004
+        card = deck.get_next_card()
+        self.assertEqual("q1", card.front)
+        deck.right(card)
+        self.assertEqual(5, card.box)
+        self.assertEqual(1004, card.timestamp)
+
+        # Card in box 5, right answer, stay in box 5
+        deck.time_fun_impl = lambda: 1500
+        card = deck.get_next_card()
+        self.assertEqual("q1", card.front)
+        deck.right(card)
+        self.assertEqual(5, card.box)
+        self.assertEqual(1500, card.timestamp)
