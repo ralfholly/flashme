@@ -11,11 +11,28 @@ import time
 
 # pylint:disable=too-few-public-methods
 class FlashCard:
+    sep_back = ' : '
+    sep_box = ' # '
+    sep_timestamp = ' @ '
+
     def __init__(self, front, back, **kwargs):
         self.front = front
         self.back = back
         self.box = kwargs['box'] if 'box' in kwargs else 0
         self.timestamp = kwargs['timestamp'] if 'timestamp' in kwargs else 0
+
+    @classmethod
+    def from_card_spec(cls, card_spec):
+        # <front>[ : <back>][ # <box>][ @ <timestamp>]
+        front_and_rest = card_spec.split(FlashCard.sep_back)
+        front = front_and_rest[0]
+        back_and_rest = front_and_rest[1].split(FlashCard.sep_box) if len(front_and_rest) == 2 else [None]
+        back = back_and_rest[0]
+        box_and_rest = back_and_rest[1].split(FlashCard.sep_timestamp) if len(back_and_rest) == 2 else [0]
+        box = int(box_and_rest[0])
+        timestamp = int(box_and_rest[1]) if len(box_and_rest) == 2 else 0
+        return cls(front, back, box=box, timestamp=timestamp)
+
 
 class Deck:
     default_expiries = [(60 * 60 * 24) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
@@ -78,6 +95,7 @@ class Deck:
         return stats
 
     def print_statistics(self, stats, verbose=True):
+        self = self
         cards_total = 0
         expired_total = 0
         for entry in stats:

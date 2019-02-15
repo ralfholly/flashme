@@ -3,6 +3,8 @@ import unittest
 from flashme import FlashCard, Deck
 
 # pylint:disable=no-self-use
+# pylint:disable=invalid-name
+
 class TestFlashMe(unittest.TestCase):
 
     def test_setup(self):
@@ -201,3 +203,28 @@ class TestFlashMe(unittest.TestCase):
         deck.insert_card(FlashCard("front", "back", box=5, timestamp=2000))
         self.assertEqual([[3, 3], [3, 1], [2, 1], [0, 0], [0, 0], [2, 0]], deck.get_statistics())
         deck.print_statistics(deck.get_statistics())
+
+    def test_from_card_spec(self):
+        fc = FlashCard.from_card_spec("front")
+        self.assertEqual("front", fc.front)
+        self.assertEqual(None, fc.back)
+        self.assertEqual(0, fc.box)
+        self.assertEqual(0, fc.timestamp)
+
+        fc = FlashCard.from_card_spec("front : back")
+        self.assertEqual("front", fc.front)
+        self.assertEqual("back", fc.back)
+        self.assertEqual(0, fc.box)
+        self.assertEqual(0, fc.timestamp)
+
+        fc = FlashCard.from_card_spec("front : back # 3")
+        self.assertEqual("front", fc.front)
+        self.assertEqual("back", fc.back)
+        self.assertEqual(3, fc.box)
+        self.assertEqual(0, fc.timestamp)
+
+        fc = FlashCard.from_card_spec("front : back # 3 @ 1000")
+        self.assertEqual("front", fc.front)
+        self.assertEqual("back", fc.back)
+        self.assertEqual(3, fc.box)
+        self.assertEqual(1000, fc.timestamp)
