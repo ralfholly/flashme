@@ -1,6 +1,6 @@
 import unittest
 
-from flashme import FlashCard, Deck
+from flashme import FlashCard, Deck, CardSpecError
 
 # pylint:disable=no-self-use
 # pylint:disable=invalid-name
@@ -262,3 +262,18 @@ class TestFlashMe(unittest.TestCase):
         self.assertEqual(None, fc)
         fc = FlashCard.from_card_spec("front : back # 123@")
         self.assertEqual(None, fc)
+
+    def test_load_cards_happy_path(self):
+        deck = Deck()
+        deck.load_cards(["q1 : a1 # 4 @ 100", "q2 : a2 # 1", "q3", "q4 : a4 # 0 @ 200"])
+        self.assertEqual("q1", deck.boxes[4][0].front)
+        self.assertEqual("a2", deck.boxes[1][0].back)
+        self.assertEqual(0, deck.boxes[1][0].timestamp)
+        self.assertEqual("q3", deck.boxes[0][0].front)
+        self.assertEqual(0, deck.boxes[0][0].timestamp)
+        self.assertEqual("a4", deck.boxes[0][1].back)
+        self.assertEqual(200, deck.boxes[0][1].timestamp)
+
+    def test_load_cards_malformed(self):
+        deck = Deck()
+        with self.assertRaises(CardSpecError) : deck.load_cards(["q1 : a1 # 4 @ 100", "q2 : a2 # error", "q3", "q4 : a4 # 0 @ 200"])

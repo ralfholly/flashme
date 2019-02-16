@@ -39,6 +39,8 @@ class FlashCard:
                 pass
         return card
 
+class CardSpecError(Exception):
+    pass
 
 class Deck:
     default_expiries = [(60 * 60 * 24) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
@@ -54,6 +56,17 @@ class Deck:
         assert len(expiries) == self.box_count
         self.boxes = [[] for _ in range(self.box_count)]
         self.current_box = 0
+
+    def load_cards(self, card_specs):
+        for card_spec in card_specs:
+            card = FlashCard.from_card_spec(card_spec)
+            if card:
+                if 0 <= card.box <= self.max_box_num:
+                    self.boxes[card.box].append(card)
+                else:
+                    raise CardSpecError("Box number out of range: " + card_spec)
+            else:
+                raise CardSpecError("Malformed card spec: " + card_spec)
 
     def insert_card(self, card, box=-1):
         box = box if box != -1 else card.box
