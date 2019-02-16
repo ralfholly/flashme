@@ -204,7 +204,7 @@ class TestFlashMe(unittest.TestCase):
         self.assertEqual([[3, 3], [3, 1], [2, 1], [0, 0], [0, 0], [2, 0]], deck.get_statistics())
         deck.print_statistics(deck.get_statistics())
 
-    def test_from_card_spec(self):
+    def test_from_card_spec_happy_path(self):
         fc = FlashCard.from_card_spec("front")
         self.assertEqual("front", fc.front)
         self.assertEqual(None, fc.back)
@@ -228,3 +228,37 @@ class TestFlashMe(unittest.TestCase):
         self.assertEqual("back", fc.back)
         self.assertEqual(3, fc.box)
         self.assertEqual(1000, fc.timestamp)
+
+    def test_from_card_spec_corner_cases(self):
+        fc = FlashCard.from_card_spec("front:")
+        self.assertEqual("front:", fc.front)
+        self.assertEqual(None, fc.back)
+        fc = FlashCard.from_card_spec("front :")
+        self.assertEqual("front :", fc.front)
+        self.assertEqual(None, fc.back)
+        fc = FlashCard.from_card_spec("front : ")
+        self.assertEqual("front", fc.front)
+        self.assertEqual("", fc.back)
+        fc = FlashCard.from_card_spec("front : back @ 123")
+        self.assertEqual("front", fc.front)
+        self.assertEqual("back @ 123", fc.back)
+        fc = FlashCard.from_card_spec("front : back #")
+        self.assertEqual("front", fc.front)
+        self.assertEqual("back #", fc.back)
+        self.assertEqual(0, fc.box)
+        self.assertEqual(0, fc.timestamp)
+        fc = FlashCard.from_card_spec("front : back #123")
+        self.assertEqual("front", fc.front)
+        self.assertEqual("back #123", fc.back)
+        self.assertEqual(0, fc.box)
+        self.assertEqual(0, fc.timestamp)
+
+    def test_from_card_spec_malformed(self):
+        fc = FlashCard.from_card_spec("")
+        self.assertEqual(None, fc)
+        fc = FlashCard.from_card_spec("front : back # abc")
+        self.assertEqual(None, fc)
+        fc = FlashCard.from_card_spec("front : back # 3 @ ab")
+        self.assertEqual(None, fc)
+        fc = FlashCard.from_card_spec("front : back # 123@")
+        self.assertEqual(None, fc)
