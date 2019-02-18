@@ -8,7 +8,6 @@
 #
 
 import time
-import sys
 
 # pylint:disable=too-few-public-methods
 class FlashCard:
@@ -119,7 +118,7 @@ class Controller:
     input_info = "I"
     input_yes = "Y"
     input_no = "N"
-    input_show = "S"
+    input_answer = "A"
 
     def __init__(self, deck):
         self.deck = deck
@@ -136,18 +135,21 @@ class Controller:
         elif inp == Controller.input_no:
             self.deck.wrong(card)
             return (inp, None)
-        elif inp == Controller.input_show:
+        elif inp == Controller.input_answer:
             return (inp, card.back)
+        # Default: show answer
+        elif not inp and card.back:
+            return (Controller.input_answer, card.back)
         return (None, None)
 
 class View:
     def print_front(self, front):
         self = self
-        return front
+        return "Front: " + front
 
     def print_back(self, back):
         self = self
-        return back
+        return "Back: " + back
 
     def print_info(self, stats, verbose=True):
         self = self
@@ -168,8 +170,8 @@ class View:
 
     def print_input(self, card_back):
         self = self
-        out_show = "(S)how"
-        out_rest = "(I)nfo (Y)es (N)o (Q)uit "
+        out_show = "[A]nswer"
+        out_rest = "(Y)es (N)o (I)nfo (Q)uit "
         if card_back:
             return out_show + " " + out_rest
         return out_rest
@@ -191,16 +193,14 @@ if __name__ == "__main__":
             break
         print(my_view.print_front(my_card.front))
         while True:
-            print(my_view.print_input(my_card.back), end="")
-            my_inp = input().upper()
+            my_inp = input(my_view.print_input(my_card.back)).upper()
             result = my_controller.handle(my_inp, my_card)
-            if result[0] == my_inp:
-                if result[0] == Controller.input_info:
-                    print(my_view.print_info(my_deck.get_statistics()))
-                elif result[0] == Controller.input_show:
-                    print(my_view.print_back(my_card.back))
-                else:
-                    break
+            if result[0] == Controller.input_info:
+                print(my_view.print_info(my_deck.get_statistics()))
+            elif result[0] == Controller.input_answer:
+                print(my_view.print_back(my_card.back))
+            else:
+                break
         if my_inp == Controller.input_quit:
             print("Bye.....")
             break
