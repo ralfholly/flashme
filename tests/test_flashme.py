@@ -202,7 +202,6 @@ class TestFlashMe(unittest.TestCase):
         deck.insert_card(FlashCard("front", "back", box=5, timestamp=1000))
         deck.insert_card(FlashCard("front", "back", box=5, timestamp=2000))
         self.assertEqual([[3, 3], [3, 1], [2, 1], [0, 0], [0, 0], [2, 0]], deck.get_statistics())
-        deck.print_statistics(deck.get_statistics())
 
     def test_from_card_spec_happy_path(self):
         fc = FlashCard.from_card_spec("front")

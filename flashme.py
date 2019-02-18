@@ -8,6 +8,7 @@
 #
 
 import time
+import sys
 
 # pylint:disable=too-few-public-methods
 class FlashCard:
@@ -113,19 +114,93 @@ class Deck:
             stats.append([len(box), expired_total])
         return stats
 
-    def print_statistics(self, stats, verbose=True):
+class Controller:
+    input_quit = "Q"
+    input_info = "I"
+    input_yes = "Y"
+    input_no = "N"
+    input_show = "S"
+
+    def __init__(self, deck):
+        self.deck = deck
+
+    def handle(self, inp, card):
+        self = self
+        if inp == Controller.input_quit:
+            return (inp, None)
+        elif inp == Controller.input_info:
+            return (inp, self.deck.get_statistics)
+        elif inp == Controller.input_yes:
+            self.deck.right(card)
+            return (inp, None)
+        elif inp == Controller.input_no:
+            self.deck.wrong(card)
+            return (inp, None)
+        elif inp == Controller.input_show:
+            return (inp, card.back)
+        return (None, None)
+
+class View:
+    def print_front(self, front):
+        self = self
+        return front
+
+    def print_back(self, back):
+        self = self
+        return back
+
+    def print_info(self, stats, verbose=True):
         self = self
         cards_total = 0
         expired_total = 0
         for entry in stats:
             cards_total += entry[0]
             expired_total += entry[1]
-        print("Expired/total: %d/%d" % (expired_total, cards_total), end=" ")
+        out = "Expired/total: %d/%d" % (expired_total, cards_total)
         if verbose:
-            print("(", end="")
+            out += " ("
             for box, entry in enumerate(stats):
-                print("%d/%d" % (entry[1], entry[0]), end="")
+                out += "%d/%d" % (entry[1], entry[0])
                 if box != len(stats) - 1:
-                    print(end=" ")
-            print(")", end="")
-        print()
+                    out += " "
+            out += ")"
+        return out
+
+    def print_input(self, card_back):
+        self = self
+        out_show = "(S)how"
+        out_rest = "(I)nfo (Y)es (N)o (Q)uit "
+        if card_back:
+            return out_show + " " + out_rest
+        return out_rest
+
+# pylint:disable=invalid-name
+if __name__ == "__main__":
+    my_expiries = [0, 1, 2, 3, 4, 100]
+    my_deck = Deck(my_expiries)
+    my_deck.time_fun = lambda: 105
+    my_deck.load_cards(["q1 : a1 # 4 @ 100", "q2 : a2 # 1", "q3 : a3 # 1 @ 101", "q4 : a4 # 0 @ 200"])
+    my_controller = Controller(my_deck)
+    my_view = View()
+
+    print(my_view.print_info(my_deck.get_statistics()))
+
+    while True:
+        my_card = my_deck.get_next_card()
+        if not my_card:
+            break
+        print(my_view.print_front(my_card.front))
+        while True:
+            print(my_view.print_input(my_card.back), end="")
+            my_inp = input().upper()
+            result = my_controller.handle(my_inp, my_card)
+            if result[0] == my_inp:
+                if result[0] == Controller.input_info:
+                    print(my_view.print_info(my_deck.get_statistics()))
+                elif result[0] == Controller.input_show:
+                    print(my_view.print_back(my_card.back))
+                else:
+                    break
+        if my_inp == Controller.input_quit:
+            print("Bye.....")
+            break
