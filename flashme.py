@@ -8,6 +8,10 @@
 #
 
 import time
+import argparse
+import os
+import os.path
+import sys
 
 # pylint:disable=too-few-public-methods
 class FlashCard:
@@ -51,10 +55,10 @@ class FlashCard:
                 pass
         return card
 
-
 class CardSpecError(Exception):
     pass
 
+# pylint:disable=too-many-instance-attributes
 class Deck:
     default_expiries = [(60 * 60 * 24) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
 
@@ -64,22 +68,25 @@ class Deck:
         self.expiries = expiries
         self.filename = filename
 
-        self.time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else time.time
+        self.time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else lambda: int(time.time())
 
-        assert len(expiries) == self.box_count
+        assert len(self.expiries) == self.box_count
         self.boxes = [[] for _ in range(self.box_count)]
         self.current_box = 0
+        self.current_box_index = None
 
-    def load_cards(self, card_specs):
+    def load_from_specs(self, card_specs):
         for card_spec in card_specs:
-            card = FlashCard.from_card_spec(card_spec)
-            if card:
-                if 0 <= card.box <= self.max_box_num:
-                    self.boxes[card.box].append(card)
+            clean_card_spec = card_spec.rstrip()
+            if clean_card_spec:
+                card = FlashCard.from_card_spec(clean_card_spec)
+                if card:
+                    if 0 <= card.box <= self.max_box_num:
+                        self.boxes[card.box].append(card)
+                    else:
+                        raise CardSpecError("Box number out of range: " + card_spec)
                 else:
-                    raise CardSpecError("Box number out of range: " + card_spec)
-            else:
-                raise CardSpecError("Malformed card spec: " + card_spec)
+                    raise CardSpecError("Malformed card spec: " + card_spec)
 
     def insert_card(self, card, box=-1):
         box = box if box != -1 else card.box
@@ -94,17 +101,26 @@ class Deck:
         time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else self.time_fun
         return time_fun() - card.timestamp >= self.expiries[card.box]
 
-    def get_next_card(self):
+    def get_next_card(self, consume=True):
         starting_box = self.current_box
         while True:
-            for index, card in enumerate(self.boxes[self.current_box]):
+            for current_box_index, card in enumerate(self.boxes[self.current_box]):
                 if self.card_expired(card):
-                    self.boxes[self.current_box].pop(index)
+                    self.current_box_index = current_box_index
+                    if consume:
+                        self.consume_current_card()
                     return card
             self.current_box = (self.current_box + 1) % self.box_count
             if self.current_box == starting_box:
                 break
+        # No current card
+        self.current_box_index = None
         return None
+
+    def consume_current_card(self):
+        if not self.current_box_index is None:
+            self.boxes[self.current_box].pop(self.current_box_index)
+        self.current_box_index = None
 
     def wrong(self, card):
         card.box = 0
@@ -126,6 +142,18 @@ class Deck:
             stats.append([len(box), expired_total])
         return stats
 
+    def load_from_file(self):
+        with open(self.filename, "r") as f:
+            card_specs = f.readlines()
+        self.load_from_specs(card_specs)
+
+    def save_to_file(self):
+        with open(self.filename, "w") as f:
+            for box in self.boxes:
+                for card in box:
+                    f.write(card.to_card_spec())
+                    f.write("\n")
+
 class Controller:
     input_quit = "Q"
     input_info = "I"
@@ -136,16 +164,20 @@ class Controller:
     def __init__(self, deck):
         self.deck = deck
 
+    # pylint:disable=too-many-return-statements
     def handle(self, inp, card):
         self = self
         if inp == Controller.input_quit:
+            self.deck.save_to_file()
             return (inp, None)
         elif inp == Controller.input_info:
             return (inp, self.deck.get_statistics)
         elif inp == Controller.input_yes:
+            self.deck.consume_current_card()
             self.deck.right(card)
             return (inp, None)
         elif inp == Controller.input_no:
+            self.deck.consume_current_card()
             self.deck.wrong(card)
             return (inp, None)
         elif inp == Controller.input_answer:
@@ -189,31 +221,46 @@ class View:
             return out_show + " " + out_rest
         return out_rest
 
+def die(text):
+    print(text, file=sys.stderr)
+
 # pylint:disable=invalid-name
 if __name__ == "__main__":
-    my_expiries = [0, 1, 2, 3, 4, 100]
-    my_deck = Deck(my_expiries)
-    my_deck.time_fun = lambda: 105
-    my_deck.load_cards(["q1 : a1 # 4 @ 100", "q2 : a2 # 1", "q3 : a3 # 1 @ 101", "q4 : a4 # 0 @ 200"])
-    my_controller = Controller(my_deck)
-    my_view = View()
+    try:
+        parser = argparse.ArgumentParser(description="A flashcard system for command-line aficionados")
+        parser.add_argument("file", type=str, help="Flashcard file to be used")
+        args = parser.parse_args()
 
-    print(my_view.print_info(my_deck.get_statistics()))
+        if not os.path.exists(args.file):
+            print("Creating new flashcard file")
+            open(args.file, "x").close()
+        if not os.access(args.file, os.R_OK | os.W_OK):
+            die("Flashcard file does not exist or is not accessible")
 
-    while True:
-        my_card = my_deck.get_next_card()
-        if not my_card:
-            break
-        print(my_view.print_front(my_card.front))
+        my_deck = Deck(filename=args.file)
+        my_deck.load_from_file()
+        my_controller = Controller(my_deck)
+        my_view = View()
+
+        print(my_view.print_info(my_deck.get_statistics()))
+
         while True:
-            my_inp = input(my_view.print_input(my_card.back)).upper()
-            result = my_controller.handle(my_inp, my_card)
-            if result[0] == Controller.input_info:
-                print(my_view.print_info(my_deck.get_statistics()))
-            elif result[0] == Controller.input_answer:
-                print(my_view.print_back(my_card.back))
-            else:
+            my_card = my_deck.get_next_card(consume=False)
+            if not my_card:
                 break
-        if my_inp == Controller.input_quit:
-            print("Bye.....")
-            break
+            print(my_view.print_front(my_card.front))
+            while True:
+                my_inp = input(my_view.print_input(my_card.back)).upper()
+                result = my_controller.handle(my_inp, my_card)
+                if result[0] == Controller.input_info:
+                    print(my_view.print_info(my_deck.get_statistics()))
+                elif result[0] == Controller.input_answer:
+                    print(my_view.print_back(my_card.back))
+                else:
+                    break
+
+            if my_inp == Controller.input_quit:
+                break
+
+    except CardSpecError as cse:
+        die(str(cse))

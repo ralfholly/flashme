@@ -269,7 +269,7 @@ class TestFlashMe(unittest.TestCase):
 
     def test_load_cards_happy_path(self):
         deck = Deck()
-        deck.load_cards(["q1 : a1 # 4 @ 100", "q2 : a2 # 1", "q3", "q4 : a4 # 0 @ 200"])
+        deck.load_from_specs(["q1 : a1 # 4 @ 100", "q2 : a2 # 1", "q3", "q4 : a4 # 0 @ 200"])
         self.assertEqual("q1", deck.boxes[4][0].front)
         self.assertEqual("a2", deck.boxes[1][0].back)
         self.assertEqual(0, deck.boxes[1][0].timestamp)
@@ -280,7 +280,8 @@ class TestFlashMe(unittest.TestCase):
 
     def test_load_cards_malformed(self):
         deck = Deck()
-        with self.assertRaises(CardSpecError) : deck.load_cards(["q1 : a1 # 4 @ 100", "q2 : a2 # error", "q3", "q4 : a4 # 0 @ 200"])
+        with self.assertRaises(CardSpecError):
+            deck.load_from_specs(["q1 : a1 # 4 @ 100", "q2 : a2 # error", "q3", "q4 : a4 # 0 @ 200"])
 
     def test_to_card_spec(self):
         fc = FlashCard("front", "back", box=4, timestamp=100)
