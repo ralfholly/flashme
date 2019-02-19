@@ -288,3 +288,15 @@ class TestFlashMe(unittest.TestCase):
         self.assertEqual("front : back # 4 @ 100", fc.to_card_spec())
         fc = FlashCard("front1", box=7)
         self.assertEqual("front1 :  # 7 @ 0", fc.to_card_spec())
+
+    def test_next_expiry(self):
+        expiries = [0, 500, 1000, 5000, 8000, 10000]
+        deck = Deck(expiries, time_fun=lambda: 2001)
+        deck.insert_card(FlashCard("front", "back", box=5, timestamp=2000))
+        self.assertEqual(2000 + 10000 - 2001, deck.next_expiry())
+        deck.insert_card(FlashCard("front", "back", box=5, timestamp=1000))
+        self.assertEqual(1000 + 10000 - 2001, deck.next_expiry())
+        deck.insert_card(FlashCard("front", "back", box=2, timestamp=1500))
+        self.assertEqual(1500 + 1000 - 2001, deck.next_expiry())
+        deck.insert_card(FlashCard("front", "back", box=2, timestamp=1000))
+        self.assertEqual(0, deck.next_expiry())

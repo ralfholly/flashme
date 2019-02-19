@@ -6,12 +6,17 @@
 # |  _| | (_| \__ \ | | | | | | | |  __/
 # |_| |_|\__,_|___/_| |_|_| |_| |_|\___|
 #
+# A flashcard system for command-line aficionados.
+#
 
 import time
 import argparse
 import os
 import os.path
 import sys
+import math
+
+SECS_PER_DAY = 60 * 60 * 24
 
 # pylint:disable=too-few-public-methods
 class FlashCard:
@@ -60,7 +65,7 @@ class CardSpecError(Exception):
 
 # pylint:disable=too-many-instance-attributes
 class Deck:
-    default_expiries = [(60 * 60 * 24) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
+    default_expiries = [(SECS_PER_DAY) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
 
     def __init__(self, expiries=default_expiries, filename="", **kwargs):
         self.box_count = 6
@@ -142,6 +147,17 @@ class Deck:
             stats.append([len(box), expired_total])
         return stats
 
+    def next_expiry(self):
+        now = self.time_fun()
+        min_expiry = sys.maxsize
+        for box_index, box in enumerate(self.boxes):
+            for card in box:
+                expiry = card.timestamp + self.expiries[box_index] - now
+                if expiry < 0:
+                    expiry = 0
+                min_expiry = min(min_expiry, expiry)
+        return min_expiry
+
     def load_from_file(self):
         with open(self.filename, "r") as f:
             card_specs = f.readlines()
@@ -190,11 +206,11 @@ class Controller:
 class View:
     def print_front(self, front):
         self = self
-        return "Front: " + front
+        return "Q: " + front
 
     def print_back(self, back):
         self = self
-        return "Back: " + back
+        return "A: " + back
 
     def print_info(self, stats, verbose=True):
         self = self
@@ -220,6 +236,11 @@ class View:
         if card_back:
             return out_show + " " + out_rest
         return out_rest
+
+    def print_nothing_to_do(self, come_back_days):
+        self = self
+        days = math.ceil(come_back_days)
+        return "Nothing to do! Plese come back in %d day(s)" % days
 
 def die(text):
     print("Fatal:", text, file=sys.stderr)
@@ -248,6 +269,9 @@ if __name__ == "__main__":
         while True:
             my_card = my_deck.get_next_card(consume=False)
             if not my_card:
+                next_expiry_in_days = my_deck.next_expiry() / SECS_PER_DAY
+                print(my_view.print_nothing_to_do(next_expiry_in_days))
+                my_deck.save_to_file()
                 break
             print(my_view.print_front(my_card.front))
             while True:
