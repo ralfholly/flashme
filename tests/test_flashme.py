@@ -206,7 +206,7 @@ class TestFlashMe(unittest.TestCase):
     def test_from_card_spec_happy_path(self):
         fc = FlashCard.from_card_spec("front")
         self.assertEqual("front", fc.front)
-        self.assertEqual(None, fc.back)
+        self.assertEqual("", fc.back)
         self.assertEqual(0, fc.box)
         self.assertEqual(0, fc.timestamp)
 
@@ -231,10 +231,10 @@ class TestFlashMe(unittest.TestCase):
     def test_from_card_spec_corner_cases(self):
         fc = FlashCard.from_card_spec("front:")
         self.assertEqual("front:", fc.front)
-        self.assertEqual(None, fc.back)
+        self.assertEqual("", fc.back)
         fc = FlashCard.from_card_spec("front :")
         self.assertEqual("front :", fc.front)
-        self.assertEqual(None, fc.back)
+        self.assertEqual("", fc.back)
         fc = FlashCard.from_card_spec("front : ")
         self.assertEqual("front", fc.front)
         self.assertEqual("", fc.back)
@@ -251,6 +251,11 @@ class TestFlashMe(unittest.TestCase):
         self.assertEqual("back #123", fc.back)
         self.assertEqual(0, fc.box)
         self.assertEqual(0, fc.timestamp)
+        fc = FlashCard.from_card_spec("front :  # 7 @ 4711")
+        self.assertEqual(fc.front, "front")
+        self.assertEqual(fc.back, "")
+        self.assertEqual(fc.box, 7)
+        self.assertEqual(fc.timestamp, 4711)
 
     def test_from_card_spec_malformed(self):
         fc = FlashCard.from_card_spec("")
@@ -276,3 +281,9 @@ class TestFlashMe(unittest.TestCase):
     def test_load_cards_malformed(self):
         deck = Deck()
         with self.assertRaises(CardSpecError) : deck.load_cards(["q1 : a1 # 4 @ 100", "q2 : a2 # error", "q3", "q4 : a4 # 0 @ 200"])
+
+    def test_to_card_spec(self):
+        fc = FlashCard("front", "back", box=4, timestamp=100)
+        self.assertEqual("front : back # 4 @ 100", fc.to_card_spec())
+        fc = FlashCard("front1", box=7)
+        self.assertEqual("front1 :  # 7 @ 0", fc.to_card_spec())
