@@ -222,7 +222,8 @@ class View:
         return out_rest
 
 def die(text):
-    print(text, file=sys.stderr)
+    print("Fatal:", text, file=sys.stderr)
+    sys.exit(1)
 
 # pylint:disable=invalid-name
 if __name__ == "__main__":
