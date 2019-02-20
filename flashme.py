@@ -7,6 +7,7 @@
 # |_| |_|\__,_|___/_| |_|_| |_| |_|\___|
 #
 # A flashcard system for command-line aficionados.
+# Copyright (c) 2019 Ralf Holly, MIT License, see LICENSE file.
 #
 
 import time
@@ -16,6 +17,7 @@ import os.path
 import sys
 import math
 
+VERSION = "0.0.9"
 SECS_PER_DAY = 60 * 60 * 24
 
 # pylint:disable=too-few-public-methods
@@ -241,6 +243,7 @@ class View:
         self = self
         days = int(come_back_days)
         hours = math.ceil((come_back_days - days) * 24)
+        print(come_back_days,days, hours)
         text = "Nothing left to do! Please come back in"
         if days > 0:
             text += " %d day(s)" % days
@@ -256,12 +259,20 @@ def die(text):
 if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description="A flashcard system for command-line aficionados")
-        parser.add_argument("file", type=str, help="Flashcard file to be used")
+        parser.add_argument("file", nargs="?", type=str, default=None, help="Flashcard file to be used")
+        parser.add_argument("-v", "--version", action="store_true", help="Show flashcard version")
         args = parser.parse_args()
 
-        if not os.path.exists(args.file):
-            print("Creating new flashcard file")
-            open(args.file, "x").close()
+        if args.version:
+            print(VERSION)
+            sys.exit(0)
+
+        if not args.file:
+            die("Please provide a flashcard file")
+
+        # if not os.path.exists(args.file):
+        #     print("Creating new flashcard file")
+        #     open(args.file, "x").close()
         if not os.access(args.file, os.R_OK | os.W_OK):
             die("Flashcard file does not exist or is not accessible")
 
@@ -270,6 +281,8 @@ if __name__ == "__main__":
         my_controller = Controller(my_deck)
         my_view = View()
 
+
+        print("flashme", VERSION)
         print(my_view.print_info(my_deck.get_statistics()))
 
         while True:
