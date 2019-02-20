@@ -16,6 +16,7 @@ import os
 import os.path
 import sys
 import math
+import signal
 
 VERSION = "0.0.9"
 SECS_PER_DAY = 60 * 60 * 24
@@ -243,7 +244,6 @@ class View:
         self = self
         days = int(come_back_days)
         hours = math.ceil((come_back_days - days) * 24)
-        print(come_back_days,days, hours)
         text = "Nothing left to do! Please come back in"
         if days > 0:
             text += " %d day(s)" % days
