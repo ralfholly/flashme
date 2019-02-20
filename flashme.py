@@ -239,8 +239,14 @@ class View:
 
     def print_nothing_to_do(self, come_back_days):
         self = self
-        days = math.ceil(come_back_days)
-        return "Nothing to do! Plese come back in %d day(s)" % days
+        days = int(come_back_days)
+        hours = math.ceil((come_back_days - days) * 24)
+        text = "Nothing left to do! Please come back in"
+        if days > 0:
+            text += " %d day(s)" % days
+        if hours > 0:
+            text += " %d hour(s)" % hours
+        return text
 
 def die(text):
     print("Fatal:", text, file=sys.stderr)
