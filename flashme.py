@@ -27,13 +27,13 @@ class FlashCard:
     sep_timestamp = ' @ '
 
     def __init__(self, front, back="", box=0, timestamp=0):
-        assert front != None
+        assert front is not None
         self.front = front
-        assert back != None
+        assert back is not None
         self.back = back
-        assert box != None
+        assert box is not None
         self.box = box
-        assert timestamp != None
+        assert timestamp is not None
         self.timestamp = timestamp
 
     def to_card_spec(self):
@@ -188,20 +188,20 @@ class Controller:
         if inp == Controller.input_quit:
             self.deck.save_to_file()
             return (inp, None)
-        elif inp == Controller.input_info:
+        if inp == Controller.input_info:
             return (inp, self.deck.get_statistics)
-        elif inp == Controller.input_yes:
+        if inp == Controller.input_yes:
             self.deck.consume_current_card()
             self.deck.right(card)
             return (inp, None)
-        elif inp == Controller.input_no:
+        if inp == Controller.input_no:
             self.deck.consume_current_card()
             self.deck.wrong(card)
             return (inp, None)
-        elif inp == Controller.input_answer:
+        if inp == Controller.input_answer:
             return (inp, card.back)
         # Default: show answer
-        elif not inp and card.back:
+        if not inp and card.back:
             return (Controller.input_answer, card.back)
         return (None, None)
 
@@ -268,6 +268,7 @@ if __name__ == "__main__":
             sys.exit(0)
 
         if not args.file:
+            parser.print_help()
             die("Please provide a flashcard file")
 
         # if not os.path.exists(args.file):
