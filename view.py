@@ -32,7 +32,10 @@ class View:
             return out_show + " " + out_rest
         return out_rest
 
-    def print_nothing_to_do(self, come_back_days):
+    def print_nothing_to_do(self):
+        return "Nothing left to do!"
+
+    def print_nothing_to_do_come_back(self, come_back_days):
         days = int(come_back_days)
         hours = math.ceil((come_back_days - days) * 24)
         text = "Nothing left to do! Please come back in"

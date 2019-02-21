@@ -114,13 +114,14 @@ class Deck:
     def next_expiry(self):
         now = self.time_fun()
         min_expiry = sys.maxsize
-        for box_index, box in enumerate(self.boxes):
+        # Exclude last box.
+        for box_index, box in enumerate(self.boxes[0:-1]):
             for card in box:
                 expiry = card.timestamp + self.expiries[box_index] - now
                 if expiry < 0:
                     expiry = 0
                 min_expiry = min(min_expiry, expiry)
-        return min_expiry
+        return min_expiry if min_expiry < sys.maxsize else None
 
     def load_from_file(self):
         with open(self.filename, "r") as f:

@@ -294,9 +294,10 @@ class TestFlashMe(unittest.TestCase):
         expiries = [0, 500, 1000, 5000, 8000, 10000]
         deck = Deck(expiries, time_fun=lambda: 2001)
         deck.insert_card(FlashCard("front", "back", box=5, timestamp=2000))
-        self.assertEqual(2000 + 10000 - 2001, deck.next_expiry())
-        deck.insert_card(FlashCard("front", "back", box=5, timestamp=1000))
-        self.assertEqual(1000 + 10000 - 2001, deck.next_expiry())
+        # Cards in last box never expire.
+        self.assertEqual(None, deck.next_expiry())
+        deck.insert_card(FlashCard("front", "back", box=4, timestamp=1000))
+        self.assertEqual(1000 + 8000 - 2001, deck.next_expiry())
         deck.insert_card(FlashCard("front", "back", box=2, timestamp=1500))
         self.assertEqual(1500 + 1000 - 2001, deck.next_expiry())
         deck.insert_card(FlashCard("front", "back", box=2, timestamp=1000))

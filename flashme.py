@@ -75,8 +75,11 @@ if __name__ == "__main__":
         while carry_on:
             my_card = get_next_card()
             if not my_card:
-                next_expiry_in_days = my_deck.next_expiry() / SECS_PER_DAY
-                print(my_view.print_nothing_to_do(next_expiry_in_days))
+                next_expiry = my_deck.next_expiry()
+                if next_expiry is not None:
+                    print(my_view.print_nothing_to_do_come_back(next_expiry / SECS_PER_DAY))
+                else:
+                    print(my_view.print_nothing_to_do())
                 my_deck.save_to_file()
                 break
             print(my_view.print_front(my_card.front))
