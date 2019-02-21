@@ -50,7 +50,8 @@ class Deck:
 
     def card_expired(self, card, **kwargs):
         time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else self.time_fun
-        return time_fun() - card.timestamp >= self.expiries[card.box]
+        return time_fun() - card.timestamp >= self.expiries[card.box] \
+            if card.box < self.max_box_num else False
 
     def get_next_card(self, consume=True):
         starting_box = self.current_box_index
@@ -71,6 +72,7 @@ class Deck:
     def get_next_card_cram_mode(self, cram=None, consume=True):
         assert cram is not None
         self.current_box_index = -1
+        # Note! In cram mode we even present cards from the last box.
         if cram == -1:
             while self.current_box_index == -1:
                 box_index = random.randint(0, self.max_box_num)

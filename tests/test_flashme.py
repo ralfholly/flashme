@@ -107,11 +107,12 @@ class TestFlashMe(unittest.TestCase):
         self.assertFalse(deck.card_expired(c2, time_fun=lambda: 1000 + 999))
         self.assertTrue(deck.card_expired(c2, time_fun=lambda: 1000 + 1000))
         self.assertTrue(deck.card_expired(c2, time_fun=lambda: 1000 + 1001))
+        # Card in last box never expires.
         c3 = FlashCard("front", "back", box=5, timestamp=1000)
         self.assertFalse(deck.card_expired(c3, time_fun=lambda: 1000))
         self.assertFalse(deck.card_expired(c3, time_fun=lambda: 1000 + 9999))
-        self.assertTrue(deck.card_expired(c3, time_fun=lambda: 1000 + 10000))
-        self.assertTrue(deck.card_expired(c3, time_fun=lambda: 1000 + 100000))
+        self.assertFalse(deck.card_expired(c3, time_fun=lambda: 1000 + 10000))
+        self.assertFalse(deck.card_expired(c3, time_fun=lambda: 1000 + 100000))
 
     def test_simple_session(self):
         expiries = [0, 1, 2, 3, 4, 100]
@@ -180,13 +181,10 @@ class TestFlashMe(unittest.TestCase):
         self.assertEqual(5, card.box)
         self.assertEqual(1004, card.timestamp)
 
-        # Card in box 5, right answer, stay in box 5
+        # Card in last box. Never expires, never presented.
         deck.time_fun = lambda: 1500
         card = deck.get_next_card()
-        self.assertEqual("q1", card.front)
-        deck.right(card)
-        self.assertEqual(5, card.box)
-        self.assertEqual(1500, card.timestamp)
+        self.assertEqual(None, card)
 
     def test_get_statistics(self):
         expiries = [0, 500, 1000, 5000, 8000, 10000]
