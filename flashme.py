@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 
-#   __ _           _
-#  / _| | __ _ ___| |__  _ __ ___   ___
-# | |_| |/ _` / __| '_ \| '_ ` _ \ / _ \
-# |  _| | (_| \__ \ | | | | | | | |  __/
-# |_| |_|\__,_|___/_| |_|_| |_| |_|\___|
 #
-# A flashcard system for command-line aficionados.
+# flashme -- a flashcard system for command-line aficionados.
 # Copyright (c) 2019 Ralf Holly, MIT License, see LICENSE file.
 #
 
@@ -14,105 +9,12 @@ import argparse
 import os
 import os.path
 import sys
-import math
 
 from deck import Deck, SECS_PER_DAY
+from view import View
+from controller import Controller
 
 VERSION = "0.0.9"
-
-#pylint:disable=too-few-public-methods
-class Controller:
-    input_quit = "Q"
-    input_info = "I"
-    input_yes = "Y"
-    input_no = "N"
-    input_show = "S"
-    input_abort = "A"
-    input_abort_yes = "Y"
-
-    def __init__(self, deck, cram):
-        self.deck = deck
-        self.cram = cram
-
-    def handle(self, inp, card):
-        retval = (None, None)
-        if inp == Controller.input_quit:
-            self.deck.save_to_file()
-            retval = (inp, None)
-        elif inp == Controller.input_info:
-            retval = (inp, self.deck.get_statistics)
-        elif inp == Controller.input_yes:
-            # No promotion in cram mode.
-            if self.cram is None:
-                self.deck.consume_current_card()
-                self.deck.right(card)
-            retval = (inp, None)
-        elif inp == Controller.input_no:
-            self.deck.consume_current_card()
-            self.deck.wrong(card)
-            retval = (inp, None)
-        elif inp == Controller.input_show:
-            retval = (inp, card.back)
-        elif inp == Controller.input_abort:
-            retval = (inp, None)
-        # Default: show answer
-        elif not inp and card.back:
-            retval = (Controller.input_show, card.back)
-        return retval
-
-class View:
-    def print_front(self, front):
-        self = self
-        return "Q: " + front
-
-    def print_back(self, back):
-        self = self
-        return "A: " + back
-
-    def print_info(self, stats, verbose=True):
-        self = self
-        cards_total = 0
-        expired_total = 0
-        for entry in stats:
-            cards_total += entry[0]
-            expired_total += entry[1]
-        out = "Expired/total: %d/%d" % (expired_total, cards_total)
-        if verbose:
-            out += " ("
-            for box, entry in enumerate(stats):
-                out += "%d/%d" % (entry[1], entry[0])
-                if box != len(stats) - 1:
-                    out += " "
-            out += ")"
-        return out
-
-    def print_input(self, card_back):
-        self = self
-        out_show = "[S]how"
-        out_rest = "(Y)es (N)o (I)nfo (Q)uit (A)bort "
-        if card_back:
-            return out_show + " " + out_rest
-        return out_rest
-
-    def print_nothing_to_do(self, come_back_days):
-        self = self
-        days = int(come_back_days)
-        hours = math.ceil((come_back_days - days) * 24)
-        text = "Nothing left to do! Please come back in"
-        if days > 0:
-            text += " %d day(s)" % days
-        if hours > 0:
-            text += " %d hour(s)" % hours
-        return text
-
-    def print_input_abort_check(self):
-        self = self
-        return "Abort without saving? Y/N "
-
-    @staticmethod
-    def die(text):
-        print("Fatal:", text, file=sys.stderr)
-        sys.exit(1)
 
 # pylint:disable=invalid-name
 if __name__ == "__main__":
