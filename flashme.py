@@ -26,7 +26,9 @@ class Controller:
     input_info = "I"
     input_yes = "Y"
     input_no = "N"
-    input_answer = "A"
+    input_show = "S"
+    input_abort = "A"
+    input_abort_yes = "Y"
 
     def __init__(self, deck, cram):
         self.deck = deck
@@ -49,11 +51,13 @@ class Controller:
             self.deck.consume_current_card()
             self.deck.wrong(card)
             retval = (inp, None)
-        elif inp == Controller.input_answer:
+        elif inp == Controller.input_show:
             retval = (inp, card.back)
+        elif inp == Controller.input_abort:
+            retval = (inp, None)
         # Default: show answer
         elif not inp and card.back:
-            retval = (Controller.input_answer, card.back)
+            retval = (Controller.input_show, card.back)
         return retval
 
 class View:
@@ -84,8 +88,8 @@ class View:
 
     def print_input(self, card_back):
         self = self
-        out_show = "[A]nswer"
-        out_rest = "(Y)es (N)o (I)nfo (Q)uit "
+        out_show = "[S]how"
+        out_rest = "(Y)es (N)o (I)nfo (Q)uit (A)bort "
         if card_back:
             return out_show + " " + out_rest
         return out_rest
@@ -100,6 +104,10 @@ class View:
         if hours > 0:
             text += " %d hour(s)" % hours
         return text
+
+    def print_input_abort_check(self):
+        self = self
+        return "Abort without saving? Y/N "
 
     @staticmethod
     def die(text):
@@ -161,7 +169,8 @@ if __name__ == "__main__":
 
         print(my_view.print_info(my_deck.get_statistics()))
 
-        while True:
+        carry_on = True
+        while carry_on:
             my_card = get_next_card()
             if not my_card:
                 next_expiry_in_days = my_deck.next_expiry() / SECS_PER_DAY
@@ -169,18 +178,22 @@ if __name__ == "__main__":
                 my_deck.save_to_file()
                 break
             print(my_view.print_front(my_card.front))
-            while True:
+            while carry_on:
                 my_inp = input(my_view.print_input(my_card.back)).upper()
                 result = my_controller.handle(my_inp, my_card)
                 if result[0] == Controller.input_info:
                     print(my_view.print_info(my_deck.get_statistics()))
-                elif result[0] == Controller.input_answer:
+                elif result[0] == Controller.input_show:
                     print(my_view.print_back(my_card.back))
+                elif result[0] == Controller.input_abort:
+                    my_inp = input(my_view.print_input_abort_check()).upper()
+                    if my_inp == Controller.input_yes:
+                        carry_on = False
                 else:
-                    break
+                    carry_on = False
 
             if my_inp == Controller.input_quit:
-                break
+                carry_on = False
 
     except Deck.CardSpecError as cse:
         View.die(str(cse))
