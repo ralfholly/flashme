@@ -116,6 +116,7 @@ if __name__ == "__main__":
             sys.exit(0)
 
         if not args.file:
+            parser.print_help()
             View.die("Please provide a flashcard file")
 
         if not os.access(args.file, os.R_OK | os.W_OK):
