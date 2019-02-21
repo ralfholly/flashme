@@ -1,6 +1,7 @@
 import unittest
 
-from flashme import FlashCard, Deck, CardSpecError
+from flashcard import FlashCard
+from flashme import Deck
 
 # pylint:disable=no-self-use
 # pylint:disable=invalid-name
@@ -280,7 +281,7 @@ class TestFlashMe(unittest.TestCase):
 
     def test_load_cards_malformed(self):
         deck = Deck()
-        with self.assertRaises(CardSpecError):
+        with self.assertRaises(Deck.CardSpecError):
             deck.load_from_specs(["q1 : a1 # 4 @ 100", "q2 : a2 # error", "q3", "q4 : a4 # 0 @ 200"])
 
     def test_to_card_spec(self):
