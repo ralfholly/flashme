@@ -28,8 +28,9 @@ class Controller:
     input_no = "N"
     input_answer = "A"
 
-    def __init__(self, deck):
+    def __init__(self, deck, cram):
         self.deck = deck
+        self.cram = cram
 
     def handle(self, inp, card):
         retval = (None, None)
@@ -39,8 +40,10 @@ class Controller:
         elif inp == Controller.input_info:
             retval = (inp, self.deck.get_statistics)
         elif inp == Controller.input_yes:
-            self.deck.consume_current_card()
-            self.deck.right(card)
+            # No promotion in cram mode.
+            if self.cram is None:
+                self.deck.consume_current_card()
+                self.deck.right(card)
             retval = (inp, None)
         elif inp == Controller.input_no:
             self.deck.consume_current_card()
@@ -109,6 +112,10 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser(description="A flashcard system for command-line aficionados")
         parser.add_argument("file", nargs="?", type=str, default=None, help="Flashcard file to be used")
         parser.add_argument("-v", "--version", action="store_true", help="Show flashcard version")
+        parser.add_argument(
+            "-c", "--cram", nargs="?", type=int, const=-1, metavar="N",
+            help="Cram mode for box N. -1: random box cramming (default)")
+        parser.add_argument("-i", "--info", action="store_true", help="Show deck info/statistics")
         args = parser.parse_args()
 
         if args.version:
@@ -124,14 +131,38 @@ if __name__ == "__main__":
 
         my_deck = Deck(filename=args.file)
         my_deck.load_from_file()
-        my_controller = Controller(my_deck)
+        my_controller = Controller(my_deck, args.cram)
         my_view = View()
 
+        if args.info:
+            print(my_view.print_info(my_deck.get_statistics()))
+            sys.exit(0)
+
         print("flashme", VERSION)
+
+        if args.cram is None:
+            get_next_card = lambda: my_deck.get_next_card(consume=False)
+        else:
+            sts = my_deck.get_statistics()
+            tot = sum(card_count for card_count, expired in sts)
+            if tot == 0:
+                View.die("All boxes are empty")
+            if -1 <= args.cram <= my_deck.max_box_num:
+                if args.cram == -1:
+                    cram_box_str = "random"
+                else:
+                    if sts[args.cram][0] == 0:
+                        View.die("Box %d is empty" % args.cram)
+                    cram_box_str = "box " + str(args.cram)
+                print("CRAMMING (%s)" % cram_box_str)
+                get_next_card = lambda: my_deck.get_next_card_cram_mode(cram=args.cram, consume=False)
+            else:
+                View.die("Cram box number must be in range -1 .. " + str(my_deck.max_box_num))
+
         print(my_view.print_info(my_deck.get_statistics()))
 
         while True:
-            my_card = my_deck.get_next_card(consume=False)
+            my_card = get_next_card()
             if not my_card:
                 next_expiry_in_days = my_deck.next_expiry() / SECS_PER_DAY
                 print(my_view.print_nothing_to_do(next_expiry_in_days))

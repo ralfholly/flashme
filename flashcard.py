@@ -6,13 +6,13 @@ class FlashCard:
     sep_timestamp = ' @ '
 
     def __init__(self, front, back="", box=0, timestamp=0):
-        assert front != None
+        assert front is not None
         self.front = front
-        assert back != None
+        assert back is not None
         self.back = back
-        assert box != None
+        assert box is not None
         self.box = box
-        assert timestamp != None
+        assert timestamp is not None
         self.timestamp = timestamp
 
     def to_card_spec(self):
