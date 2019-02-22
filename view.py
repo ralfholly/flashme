@@ -4,10 +4,10 @@ import sys
 # pylint:disable=no-self-use
 class View:
     def print_front(self, front):
-        return "Q: " + front
+        return "Q: " + View.replace_escapes(front)
 
     def print_back(self, back):
-        return "A: " + back
+        return "A: " + View.replace_escapes(back)
 
     def print_info(self, stats, verbose=True):
         cards_total = 0
@@ -55,3 +55,7 @@ class View:
     def die(text):
         print("Fatal:", text, file=sys.stderr)
         sys.exit(1)
+
+    @staticmethod
+    def replace_escapes(text):
+        return text.replace("\\n", "\n")
