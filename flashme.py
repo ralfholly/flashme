@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# flashme -- a flashcard system for command-line aficionados.
+# flashme -- Flashcards for command-line aficionados.
 # Copyright (c) 2019 Ralf Holly, MIT License, see LICENSE file.
 #
 

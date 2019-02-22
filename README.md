@@ -1,4 +1,4 @@
-# flashme -- A flashcard system for command-line afficionados
+# flashme -- Flashcards for command-line aficionados
 
 ## Introduction
 
