@@ -25,7 +25,7 @@ Next, you can start learning by running `flashme` like this
 $ flashme english-german
 ```
 
-All cards that have expired (cards in box 0 have always expired) will be presented to you. If you indicate that you know the answer (by selecting 'Y') the card is promoted to the next box; if you don't know the answer (by selecting 'N') the card is sent back to box 0. When you select (Q)uit, all boxes (with updated box numbers and timestamps) are commited to the deskfile.
+All cards that have expired will be presented to you. If you indicate that you know the answer (by selecting 'Y') the card is promoted to the next box; if you don't know the answer (by selecting 'N') the card is sent back to box 0. When you select (Q)uit, all boxes (with updated box numbers and timestamps) are commited to the deskfile.
 
 ## More on CardSpecs
 
