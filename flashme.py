@@ -71,8 +71,8 @@ if __name__ == "__main__":
 
         print(my_view.print_info(my_deck.get_statistics()))
 
-        carry_on = True
-        while carry_on:
+        keep_learning = True
+        while keep_learning:
             my_card = get_next_card()
             if not my_card:
                 next_expiry = my_deck.next_expiry()
@@ -83,7 +83,7 @@ if __name__ == "__main__":
                 my_deck.save_to_file()
                 break
             print(my_view.print_front(my_card.front))
-            while carry_on:
+            while True:
                 my_inp = input(my_view.print_input(my_card.back)).upper()
                 result = my_controller.handle(my_inp, my_card)
                 if result[0] == Controller.input_info:
@@ -93,12 +93,13 @@ if __name__ == "__main__":
                 elif result[0] == Controller.input_abort:
                     my_inp = input(my_view.print_input_abort_check()).upper()
                     if my_inp == Controller.input_yes:
-                        carry_on = False
+                        keep_learning = False
+                        break
                 else:
-                    carry_on = False
+                    break
 
             if my_inp == Controller.input_quit:
-                carry_on = False
+                keep_learning = False
 
     except Deck.CardSpecError as cse:
         View.die(str(cse))
