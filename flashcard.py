@@ -1,6 +1,6 @@
-
-# pylint:disable=too-few-public-methods
 class FlashCard:
+    # Card spec
+    # <front>[ : <back>][ # <box>][ @ <timestamp>]
     sep_back = ' : '
     sep_box = ' # '
     sep_timestamp = ' @ '
@@ -25,7 +25,6 @@ class FlashCard:
 
     @classmethod
     def from_card_spec(cls, card_spec):
-        # <front>[ : <back>][ # <box>][ @ <timestamp>]
         card = None
         if card_spec:
             front_and_rest = card_spec.split(FlashCard.sep_back)

@@ -48,6 +48,9 @@ class View:
     def print_input_abort_check(self):
         return "Abort without saving? Y/N "
 
+    def print_version(self, version):
+        return "flashme, version " + version
+
     @staticmethod
     def die(text):
         print("Fatal:", text, file=sys.stderr)
