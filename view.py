@@ -3,11 +3,20 @@ import sys
 
 # pylint:disable=no-self-use
 class View:
+    def __init__(self, terse):
+        self.terse = terse
+
     def print_front(self, front):
-        return "Q: " + View.replace_escapes(front)
+        front = "Q: " + View.replace_escapes(front)
+        if not self.terse:
+            front += "\n"
+        return front
 
     def print_back(self, back):
-        return "A: " + View.replace_escapes(back)
+        back = "A: " + View.replace_escapes(back)
+        if not self.terse:
+            back += "\n"
+        return back
 
     def print_info(self, stats, verbose=True):
         cards_total = 0
@@ -26,11 +35,14 @@ class View:
         return out
 
     def print_input(self, card_back):
-        out_show = "[S]how"
-        out_rest = "(Y)es (N)o (I)nfo (Q)uit (A)bort "
-        if card_back:
-            return out_show + " " + out_rest
-        return out_rest
+        if not self.terse:
+            out_first_part = "[S]how"
+            out = "(Y)es (N)o (I)nfo (Q)uit (A)bort "
+            if card_back:
+                return out_first_part + " " + out
+        else:
+            out = " "
+        return out
 
     def print_nothing_to_do(self):
         return "Nothing left to do!"

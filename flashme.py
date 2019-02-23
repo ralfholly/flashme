@@ -25,9 +25,10 @@ class Flashme:
             "-c", "--cram", nargs="?", type=int, const=-1, metavar="N",
             help="Cram mode for box N. -1: random box cramming (default)")
         parser.add_argument("-i", "--info", action="store_true", help="Show deck info/statistics")
+        parser.add_argument("-t", "--terse", action="store_true", help="Terse output style")
         self.args = parser.parse_args()
 
-        self.view = View()
+        self.view = View(self.args.terse)
 
         if self.args.version:
             print(self.view.print_version(VERSION))
@@ -74,14 +75,15 @@ class Flashme:
                     print(self.view.print_nothing_to_do())
                 self.deck.save_to_file()
                 break
-            print(self.view.print_front(my_card.front))
+            print(self.view.print_front(my_card.front), end="")
             while True:
-                my_inp = input(self.view.print_input(my_card.back)).upper()
+                print(self.view.print_input(my_card.back), end="")
+                my_inp = input().upper()
                 result = self.controller.handle(my_inp, my_card)
                 if result[0] == Controller.input_info:
                     print(self.view.print_info(self.deck.get_statistics()))
                 elif result[0] == Controller.input_show:
-                    print(self.view.print_back(my_card.back))
+                    print(self.view.print_back(my_card.back), end="")
                 elif result[0] == Controller.input_abort:
                     my_inp = input(self.view.print_input_abort_check()).upper()
                     if my_inp == Controller.input_yes:
