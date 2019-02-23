@@ -59,3 +59,19 @@ Just clone the `flashme` repository to a location of your choice. It's recommend
 ```
 ln -s ~/flashme/flashme.sh ~/bin/flashme
 ```
+
+## Tips and Tricks
+
+Put your deckfiles under version control, commit often!
+Display all cards in box 3:
+```
+grep " # 3 " deckfile
+```
+Move all cards from box 5 to box 0:
+```
+sed -i "s/ # 5 / # 0 /" deckfile
+```
+Remove all timestamps (all cards will expire immediately):
+```
+ sed -i "s/ @ [0-9]\+//" deckfile
+```
