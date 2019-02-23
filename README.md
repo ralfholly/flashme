@@ -75,3 +75,4 @@ sed -i "s/ # 5 / # 0 /" deckfile
 ```
  sed -i "s/ @ [0-9]\+//" deckfile
 ```
+- Use `--terse` to get a less noisy menu/prompt
