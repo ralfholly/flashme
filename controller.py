@@ -4,9 +4,9 @@ class Controller:
     input_info = "I"
     input_yes = "Y"
     input_no = "N"
-    input_show = "S"
-    input_abort = "A"
-    input_abort_yes = "Y"
+    input_show = "A"
+    input_cancel = "C"
+    input_cancel_yes = "Y"
 
     def __init__(self, deck, cram):
         self.deck = deck
@@ -31,7 +31,7 @@ class Controller:
             retval = (inp, None)
         elif inp == Controller.input_show:
             retval = (inp, card.back)
-        elif inp == Controller.input_abort:
+        elif inp == Controller.input_cancel:
             retval = (inp, None)
         # Default: show answer
         elif not inp and card.back:

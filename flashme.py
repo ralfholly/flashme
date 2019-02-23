@@ -73,7 +73,7 @@ class Flashme:
                     print(self.view.print_nothing_to_do_come_back(next_expiry / SECS_PER_DAY))
                 else:
                     print(self.view.print_nothing_to_do())
-                self.deck.save_to_file()
+                self.controller.handle(Controller.input_quit, my_card)
                 break
             print(self.view.print_front(my_card.front), end="")
             while True:
@@ -84,8 +84,8 @@ class Flashme:
                     print(self.view.print_info(self.deck.get_statistics()))
                 elif result[0] == Controller.input_show:
                     print(self.view.print_back(my_card.back), end="")
-                elif result[0] == Controller.input_abort:
-                    my_inp = input(self.view.print_input_abort_check()).upper()
+                elif result[0] == Controller.input_cancel:
+                    my_inp = input(self.view.print_input_cancel_check()).upper()
                     if my_inp == Controller.input_yes:
                         return
                 else:

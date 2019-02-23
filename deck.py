@@ -18,6 +18,7 @@ class Deck:
         self.max_box_num = self.box_count - 1
         self.expiries = expiries
         self.filename = filename
+        self.modified = False
 
         self.time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else lambda: int(time.time())
 
@@ -97,12 +98,14 @@ class Deck:
         card.box = 0
         card.timestamp = self.time_fun()
         self.boxes[0].append(card)
+        self.modified = True
 
     def right(self, card):
         if card.box < self.box_count - 1:
             card.box += 1
         card.timestamp = self.time_fun()
         self.boxes[card.box].append(card)
+        self.modified = True
 
     def get_statistics(self):
         stats = []
@@ -131,8 +134,9 @@ class Deck:
         self.load_from_specs(card_specs)
 
     def save_to_file(self):
-        with open(self.filename, "w") as f:
-            for box in self.boxes:
-                for card in box:
-                    f.write(card.to_card_spec())
-                    f.write("\n")
+        if self.modified:
+            with open(self.filename, "w") as f:
+                for box in self.boxes:
+                    for card in box:
+                        f.write(card.to_card_spec())
+                        f.write("\n")

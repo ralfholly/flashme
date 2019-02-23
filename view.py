@@ -35,14 +35,12 @@ class View:
         return out
 
     def print_input(self, card_back):
+        out = ""
         if not self.terse:
-            out_first_part = "[S]how"
-            out = "(Y)es (N)o (I)nfo (Q)uit (A)bort "
+            out = "(Y)es (N)o (I)nfo (Q)uit (C)ancel"
             if card_back:
-                return out_first_part + " " + out
-        else:
-            out = " "
-        return out
+                out = "[A]nswer " + out
+        return out + " "
 
     def print_nothing_to_do(self):
         return "Nothing left to do!"
@@ -57,8 +55,8 @@ class View:
             text += " %d hour(s)" % hours
         return text
 
-    def print_input_abort_check(self):
-        return "Abort without saving? Y/N "
+    def print_input_cancel_check(self):
+        return "Cancel without saving? Y/N "
 
     def print_version(self, version):
         return "flashme, version " + version
