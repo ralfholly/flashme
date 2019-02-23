@@ -26,6 +26,7 @@ class Flashme:
             help="Cram mode for box N. -1: random box cramming (default)")
         parser.add_argument("-i", "--info", action="store_true", help="Show deck info/statistics")
         parser.add_argument("-t", "--terse", action="store_true", help="Terse output style")
+        parser.add_argument("-s", "--silent-start", action="store_true", help="Silently exit if no cards have expired")
         self.args = parser.parse_args()
 
         self.view = View(self.args.terse)
@@ -49,24 +50,26 @@ class Flashme:
             print(self.view.print_info(self.deck.get_statistics()))
             sys.exit(0)
 
+        if self.args.cram is None:
+            self.get_next_card_fun = lambda: self.deck.get_next_card(consume=False)
+        else:
+            self.get_next_card_fun = self.init_cram_mode()
+
+        if self.args.silent_start and not self.get_next_card_fun():
+            sys.exit(0)
+
     def run(self):
         try:
             print(self.view.print_version(VERSION))
-
-            if self.args.cram is None:
-                get_next_card_fun = lambda: self.deck.get_next_card(consume=False)
-            else:
-                get_next_card_fun = self.init_cram_mode()
-
             print(self.view.print_info(self.deck.get_statistics()))
-            self.study_loop(get_next_card_fun)
+            self.study_loop()
 
         except Deck.CardSpecError as cse:
             View.die(str(cse))
 
-    def study_loop(self, get_next_card):
+    def study_loop(self):
         while True:
-            my_card = get_next_card()
+            my_card = self.get_next_card_fun()
             if not my_card:
                 next_expiry = self.deck.next_expiry()
                 if next_expiry is not None:
