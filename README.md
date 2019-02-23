@@ -45,6 +45,8 @@ $ date --date "@1550826208" --utc
 Fri Feb 22 09:03:28 UTC 2019
 ```
 
+`\n` character sequences within `<front>` or `<back>` will be replaced with a line breaks. This way, your cards can span multiple lines.
+
 ## Regular Learning vs. Cramming
 
 Regular learning means that only expired cards are presented for repetition. If a card is remembered correctly, it's promoted to the next higher box until it reaches box 5, where it stays forever. If a card is not remembered correctly, it goes straight back to box 0.
