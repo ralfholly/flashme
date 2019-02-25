@@ -27,9 +27,10 @@ class Flashme:
         parser.add_argument("-i", "--info", action="store_true", help="Show deck info/statistics")
         parser.add_argument("-t", "--terse", action="store_true", help="Terse output style")
         parser.add_argument("-s", "--silent-start", action="store_true", help="Silently exit if no cards have expired")
+        parser.add_argument("-r", "--reverse", action="store_true", help="Reverse learning: show back and ask for front")
         self.args = parser.parse_args()
 
-        self.view = View(self.args.terse)
+        self.view = View(self.args.terse, self.args.reverse)
 
         if self.args.version:
             print(self.view.print_version(VERSION))
@@ -78,7 +79,7 @@ class Flashme:
                     print(self.view.print_nothing_to_do())
                 self.controller.handle(Controller.input_quit, my_card)
                 break
-            print(self.view.print_front(my_card.front), end="")
+            print(self.view.print_question(my_card), end="")
             while True:
                 print(self.view.print_input(my_card.back), end="")
                 my_inp = input().upper()
@@ -86,7 +87,7 @@ class Flashme:
                 if result[0] == Controller.input_info:
                     print(self.view.print_info(self.deck.get_statistics()))
                 elif result[0] == Controller.input_show:
-                    print(self.view.print_back(my_card.back), end="")
+                    print(self.view.print_answer(my_card), end="")
                 elif result[0] == Controller.input_cancel:
                     my_inp = input(self.view.print_input_cancel_check()).upper()
                     if my_inp == Controller.input_yes:

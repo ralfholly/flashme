@@ -3,17 +3,18 @@ import sys
 
 # pylint:disable=no-self-use
 class View:
-    def __init__(self, terse):
+    def __init__(self, terse, reverse):
         self.terse = terse
+        self.reverse = reverse
 
-    def print_front(self, front):
-        front = "Q: " + View.replace_escapes(front)
+    def print_question(self, card):
+        front = "Q: " + View.replace_escapes(card.front if not self.reverse else card.back)
         if not self.terse:
             front += "\n"
         return front
 
-    def print_back(self, back):
-        back = "A: " + View.replace_escapes(back)
+    def print_answer(self, card):
+        back = "A: " + View.replace_escapes(card.back if not self.reverse else card.front)
         if not self.terse:
             back += "\n"
         return back
