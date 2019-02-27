@@ -66,7 +66,7 @@ You can specify deckfile search paths via the `FLASHME_DIR` environment variable
 
 ## Notification When Cards Have Expired
 
-A very simple approach to get notified when cards have expired is to run a check regularly (e. g. every hour as a cron job) and display a notification whenever an interactive shell is opened
+Here's a simple solution if you want to get notified when cards have expired. Run a check regularly (e. g. every hour as a cron user job) and display a notification whenever an interactive shell is opened:
 
 ```
 $ crontab -e
@@ -80,8 +80,10 @@ if [ -s $FLASHME_EXPIRED_FILE ]; then
     echo "----------------------"
     cat $FLASHME_EXPIRED_FILE
     # Notify only once per hour:
-    rm -f $FLASHME_EXPIRED_FILE                                                                                                                                                                             12 fi       
+    rm -f $FLASHME_EXPIRED_FILE
 ```
+
+Of course, it's even simpler if you run the check directly (every time) in `.bashrc` but this might mean you have to wait a couple of seconds until the prompt appears. Let me know if you have come up with something clever!
 
 ## Tips and Tricks
 
