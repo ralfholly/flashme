@@ -52,6 +52,9 @@ class View:
     def print_nothing_to_do_come_back(self, come_back_days):
         days = int(come_back_days)
         hours = math.ceil((come_back_days - days) * 24)
+        if hours == 24:
+            days += 1
+            hours = 0
         text = "Nothing left to do! Please come back in"
         if days > 0:
             text += " %d day(s)" % days
