@@ -60,6 +60,10 @@ Just clone the `flashme` repository to a location of your choice. It's recommend
 ln -s ~/flashme/flashme.sh ~/bin/flashme
 ```
 
+## FLASHME_DIR
+
+You can specify deckfile search paths via the `FLASHME_DIR` environment variable. Use the path separator of your operating system to separate search directories (i. e. `:` on Linux, `;` on Windows). When locating a deckfile, the filename as given is tried first. If the deckfile is not reachable, all paths found in `FLASHME_DIR` are searched (in right-to-left order).
+
 ## Tips and Tricks
 
 - Put your deckfiles under version control, commit often!

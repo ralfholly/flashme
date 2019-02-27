@@ -35,6 +35,9 @@ class View:
             out += ")"
         return out
 
+    def print_deckfile(self, deckfile):
+        return deckfile
+
     def print_input(self, card_back):
         out = ""
         if not self.terse:

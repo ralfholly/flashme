@@ -1,6 +1,8 @@
 import time
 import sys
 import random
+import os
+import os.path
 
 from flashcard import FlashCard
 
@@ -11,13 +13,17 @@ class Deck:
     class CardSpecError(Exception):
         pass
 
-    default_expiries = [(SECS_PER_DAY) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
+    class DeckfileNotFoundError(Exception):
+        pass
 
-    def __init__(self, expiries=default_expiries, filename="", **kwargs):
+    default_expiries = [(SECS_PER_DAY) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
+    flashme_dir_env_string = "FLASHME_DIR"
+
+    def __init__(self, expiries=default_expiries, filename=None, **kwargs):
         self.box_count = len(expiries)
         self.max_box_num = self.box_count - 1
         self.expiries = expiries
-        self.filename = filename
+        self.filename = None
         self.modified = False
 
         self.time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else lambda: int(time.time())
@@ -26,6 +32,11 @@ class Deck:
         self.boxes = [[] for _ in range(self.box_count)]
         self.current_box_index = 0
         self.current_card_index = None
+
+        if filename:
+            self.filename = Deck.locate_file(filename)
+            if not self.filename:
+                raise Deck.DeckfileNotFoundError("Flashcard file does not exist or is not accessible")
 
     def load_from_specs(self, card_specs):
         for card_spec in card_specs:
@@ -134,9 +145,25 @@ class Deck:
         self.load_from_specs(card_specs)
 
     def save_to_file(self):
-        if self.modified:
+        if self.filename and self.modified:
             with open(self.filename, "w") as f:
                 for box in self.boxes:
                     for card in box:
                         f.write(card.to_card_spec())
                         f.write("\n")
+
+    @staticmethod
+    def locate_file(filename):
+        resolved_filename = None
+        # First, try filename as given.
+        if os.access(filename, os.R_OK | os.W_OK):
+            resolved_filename = filename
+        else:
+            # Then all paths found in FLASHME_DIR.
+            if Deck.flashme_dir_env_string in os.environ:
+                for flashme_dir in reversed(os.environ[Deck.flashme_dir_env_string].split(os.pathsep)):
+                    path = os.path.join(flashme_dir, filename)
+                    if os.access(path, os.R_OK | os.W_OK):
+                        resolved_filename = path
+                        break
+        return resolved_filename

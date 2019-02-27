@@ -6,8 +6,6 @@
 #
 
 import argparse
-import os
-import os.path
 import sys
 
 from deck import Deck, SECS_PER_DAY
@@ -40,11 +38,12 @@ class Flashme:
             parser.print_help()
             View.die("Please provide a flashcard file")
 
-        if not os.access(self.args.file, os.R_OK | os.W_OK):
-            View.die("Flashcard file does not exist or is not accessible")
+        try:
+            self.deck = Deck(filename=self.args.file)
+            self.deck.load_from_file()
+        except Deck.DeckfileNotFoundError as dfe:
+            View.die(dfe)
 
-        self.deck = Deck(filename=self.args.file)
-        self.deck.load_from_file()
         self.controller = Controller(self.deck, self.args.cram)
 
         if self.args.info:
@@ -62,6 +61,7 @@ class Flashme:
     def run(self):
         try:
             print(self.view.print_version(VERSION))
+            print(self.view.print_deckfile(self.deck.filename))
             print(self.view.print_info(self.deck.get_statistics()))
             self.study_loop()
 
@@ -103,7 +103,7 @@ class Flashme:
         tot = sum(card_count for card_count, expired in sts)
         if tot == 0:
             View.die("All boxes are empty")
-        if -1 <= self.args.cram <= self.deck.max_box_num:
+        elif -1 <= self.args.cram <= self.deck.max_box_num:
             if self.args.cram == -1:
                 cram_box_str = "random"
             else:
