@@ -68,6 +68,12 @@ class View:
     def print_version(self, version):
         return "flashme, version " + version
 
+    def print_expired_counts(self, expired_counts):
+        text = ""
+        for deckfile, count in expired_counts:
+            text += "%4d %s\n" % (count, deckfile)
+        return text
+
     @staticmethod
     def die(text):
         print("Fatal:", text, file=sys.stderr)

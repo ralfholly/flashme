@@ -64,6 +64,25 @@ ln -s ~/flashme/flashme.sh ~/bin/flashme
 
 You can specify deckfile search paths via the `FLASHME_DIR` environment variable. Use the path separator of your operating system to separate search directories (i. e. `:` on Linux, `;` on Windows). When locating a deckfile, the filename as given is tried first. If the deckfile is not reachable, all paths found in `FLASHME_DIR` are searched (in right-to-left order).
 
+## Notification When Cards Have Expired
+
+A very simple approach to get notified when cards have expired is to run a check regularly (e. g. every hour as a cron job) and display a notification whenever an interactive shell is opened
+
+```
+$ crontab -e
+@hourly /opt/flashme/flashme.sh --expired english-german french-german linux-tips > ~/.flashme.expired
+```
+```
+$ vi ~/.bashrc
+FLASHME_EXPIRED_FILE=~/.flashme.expired
+if [ -s $FLASHME_EXPIRED_FILE ]; then
+    echo "Expired Flashme decks:"
+    echo "----------------------"
+    cat $FLASHME_EXPIRED_FILE
+    # Notify only once per hour:
+    rm -f $FLASHME_EXPIRED_FILE                                                                                                                                                                             12 fi       
+```
+
 ## Tips and Tricks
 
 - Put your deckfiles under version control, commit often!

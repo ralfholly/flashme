@@ -17,7 +17,7 @@ VERSION = "0.0.9"
 class Flashme:
     def __init__(self):
         parser = argparse.ArgumentParser(description="A flashcard system for command-line aficionados")
-        parser.add_argument("file", nargs="?", type=str, default=None, help="Flashcard file to be used")
+        parser.add_argument("file", nargs="?", type=str, default=None, metavar="DECKFILE", help="Flashcard file to be used")
         parser.add_argument("-v", "--version", action="store_true", help="Show flashcard version")
         parser.add_argument(
             "-c", "--cram", nargs="?", type=int, const=-1, metavar="N",
@@ -26,12 +26,17 @@ class Flashme:
         parser.add_argument("-t", "--terse", action="store_true", help="Terse output style")
         parser.add_argument("-s", "--silent-start", action="store_true", help="Silently exit if no cards have expired")
         parser.add_argument("-r", "--reverse", action="store_true", help="Reverse learning: show back and ask for front")
+        parser.add_argument("-e", "--expired", nargs="+", type=str, default=None, metavar="DECKFILE", help="List count of expired cards for given deckfiles")
         self.args = parser.parse_args()
 
         self.view = View(self.args.terse, self.args.reverse)
 
         if self.args.version:
             print(self.view.print_version(VERSION))
+            sys.exit(0)
+
+        if self.args.expired:
+            print(self.view.print_expired_counts(Flashme.get_expired_counts(self.args.expired)), end="")
             sys.exit(0)
 
         if not self.args.file:
@@ -115,6 +120,21 @@ class Flashme:
         else:
             View.die("Cram box number must be in range -1 .. " + str(self.deck.max_box_num))
         return None
+
+    @staticmethod
+    def get_expired_counts(deckfiles):
+        expired_counts = []
+        for deckfile in deckfiles:
+            try:
+                deck = Deck(filename=deckfile)
+                deck.load_from_file()
+                stats = deck.get_statistics()
+                expired = stats[0][1]
+                if expired:
+                    expired_counts.append((deckfile, stats[0][1]))
+            except Deck.DeckfileNotFoundError as dfe:
+                View.die(dfe)
+        return expired_counts
 
 if __name__ == "__main__":
     Flashme().run()
