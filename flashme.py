@@ -132,9 +132,9 @@ class Flashme:
                 deck = Deck(filename=deckfile)
                 deck.load_from_file()
                 stats = deck.get_statistics()
-                expired = stats[0][1]
+                expired = sum([exp for tot, exp in stats])
                 if expired:
-                    expired_counts.append((deckfile, stats[0][1]))
+                    expired_counts.append((deckfile, expired))
             except Deck.DeckfileNotFoundError as dfe:
                 View.die(dfe)
         return expired_counts
