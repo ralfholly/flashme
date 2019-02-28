@@ -1,5 +1,9 @@
 class FlashCard:
-    # Card spec
+    """ Physical flashcard abstraction.
+        Stores flashcard properties, eg. front-side text, back-side text, which box it belongs to.
+    """
+
+    # Card spec:
     # <front>[ : <back>][ # <box>][ @ <timestamp>]
     sep_back = ' : '
     sep_box = ' # '

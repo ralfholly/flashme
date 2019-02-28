@@ -15,6 +15,9 @@ from controller import Controller
 VERSION = "0.0.9"
 
 class Flashme:
+    """ Main program entry point.
+        Parses and handles command-line arguments, executes the study loop.
+    """
     def __init__(self):
         parser = argparse.ArgumentParser(description="A flashcard system for command-line aficionados")
         parser.add_argument("file", nargs="?", type=str, default=None, metavar="DECKFILE", help="Flashcard file to be used")

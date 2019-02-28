@@ -3,6 +3,8 @@ import sys
 
 # pylint:disable=no-self-use
 class View:
+    """ This class is responsible for displaying information to the user. """
+
     def __init__(self, terse, reverse):
         self.terse = terse
         self.reverse = reverse

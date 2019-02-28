@@ -10,6 +10,10 @@ SECS_PER_DAY = 60 * 60 * 24
 
 # pylint:disable=too-many-instance-attributes
 class Deck:
+    """ Represents a deck of flashcards, distributed over boxes.
+        Implements the main flashcard business logic, eg. card promotion, demotion, expiry.
+    """
+
     class CardSpecError(Exception):
         pass
 

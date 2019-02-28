@@ -1,5 +1,7 @@
 #pylint:disable=too-few-public-methods
 class Controller:
+    """ Handles input entered by user. """
+
     input_quit = "Q"
     input_info = "I"
     input_yes = "Y"
