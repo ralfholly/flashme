@@ -81,6 +81,7 @@ if [ -s $FLASHME_EXPIRED_FILE ]; then
     cat $FLASHME_EXPIRED_FILE
     # Notify only once per hour:
     rm -f $FLASHME_EXPIRED_FILE
+fi
 ```
 
 Of course, it's even simpler if you run the check directly (every time) in `.bashrc` but this might mean you have to wait a couple of seconds until the prompt appears. A more sophisticated approach would utilize the `PROMPT_COMMAND` environment variable to show an nice "expired" indicator.  Let me know if you have come up with something clever!
