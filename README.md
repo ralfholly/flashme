@@ -62,11 +62,11 @@ ln -s ~/flashme/flashme.sh ~/bin/flashme
 
 ## FLASHME_DIR
 
-You can specify deckfile search paths via the `FLASHME_DIR` environment variable. Use the path separator of your operating system to separate search directories (i. e. `:` on Linux, `;` on Windows). When locating a deckfile, the filename as given is tried first. If the deckfile is not reachable, all paths found in `FLASHME_DIR` are searched (in right-to-left order).
+You can specify deckfile search paths via the `FLASHME_DIR` environment variable. Use the path separator of your operating system to separate search directories (i. e. `:` on Linux, `;` on Windows). When locating a deckfile, the filename as given on the command-line is tried first. If the deckfile is not reachable, all paths found in `FLASHME_DIR` are searched (in right-to-left order).
 
 ## Notification When Cards Have Expired
 
-Here's a simple solution if you want to get notified when cards have expired. Run a check regularly (e. g. every hour as a cron user job) and display a notification whenever an interactive shell is opened:
+Personally, I prefer to manually check for expired cards every once in a while. However, here's a simple solution for you if you want to get notified when cards have expired. Run a check regularly (e. g. every hour as a cron user job) and display a notification whenever an interactive shell is opened:
 
 ```
 $ crontab -e
@@ -83,7 +83,7 @@ if [ -s $FLASHME_EXPIRED_FILE ]; then
     rm -f $FLASHME_EXPIRED_FILE
 ```
 
-Of course, it's even simpler if you run the check directly (every time) in `.bashrc` but this might mean you have to wait a couple of seconds until the prompt appears. Let me know if you have come up with something clever!
+Of course, it's even simpler if you run the check directly (every time) in `.bashrc` but this might mean you have to wait a couple of seconds until the prompt appears. A more sophisticated approach would utilize the `PROMPT_COMMAND` environment variable to show an nice "expired" indicator.  Let me know if you have come up with something clever!
 
 ## Tips and Tricks
 
