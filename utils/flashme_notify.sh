@@ -4,6 +4,11 @@
 # Use 'notify-send' to inform about expired decks/cards
 #
 
+if [ -z $1 ]; then
+    echo "Usage: $0 <deckfile> ..."
+    exit 1
+fi
+
 THIS_DIR=$(dirname $(readlink -f $0))
 FLASHME_EXPIRED_FILE="/tmp/flashme_expired"
 
