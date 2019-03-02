@@ -102,7 +102,7 @@ sed -i "s/ # 5 / # 0 /" deckfile
  sed -i "s/ @ [0-9]\+//" deckfile
 ```
 - Use `--terse` to get a less noisy menu/prompt
-- To change the number of boxes or box expiry times, just modify this list in `deck.py`. (Please note that the last box never expires, so the actual expiry value of the last list element doesn't really matter.):
+- To change the number of boxes or box expiry times, just modify the `default_expiries_days` list in `deck.py`. (Please note that the last box never expires, so the actual expiry value of the last list element doesn't really matter.):
 ```
 default_expiries_days = [0, 2, 10, 30, 90, -1]
 ```
