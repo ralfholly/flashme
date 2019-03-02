@@ -20,7 +20,8 @@ class Deck:
     class DeckfileNotFoundError(Exception):
         pass
 
-    default_expiries = [(SECS_PER_DAY) * expiry for expiry in [0, 2, 10, 30, 90, 1000000]]
+    default_expiries_days = [0, 2, 10, 30, 90, -1]
+    default_expiries = [(SECS_PER_DAY) * expiry_days for expiry_days in default_expiries_days]
     flashme_dir_env_string = "FLASHME_DIR"
 
     def __init__(self, expiries=default_expiries, filename=None, **kwargs):
