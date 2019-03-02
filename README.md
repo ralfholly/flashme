@@ -4,7 +4,7 @@
 
 I felt compelled to write `flashme` because I couldn't find anything like it. While there are many freeware flashcard programs out there, none met my chief requirement: it must be fully operable from the command-line. My next most important requirement was that cards must be kept in plain text files (so-called deckfiles): I want to be able to diff, grep, and edit deckfiles with standard Unix command-line tools and editors. Binary file formats, including zipped XML files, are a plain nuisance and make it difficult to store flashcards in version control systems.
 
-`flashme` is based on the original [Leitner system](https://en.wikipedia.org/wiki/Leitner_system) and uses six boxes (box 0 to box 5) with the following expiry times (in days): 0, 2, 10, 30, 90; the last box (box 5) never expires. (The number of boxes and expiry times can easily be tweaked, see "Tips and Tricks" below.)
+`flashme` is based on the original [Leitner system](https://en.wikipedia.org/wiki/Leitner_system) and uses six boxes (box 0 to box 5) with the following expiry times (in days): 0, 2, 10, 30, 90; the last box (box 5) never expires. (The number of boxes and expiry times can easily be tweaked, see [Tips and Tricks](#tips-and-tricks) below.)
 
 ## Usage
 
@@ -102,8 +102,7 @@ sed -i "s/ # 5 / # 0 /" deckfile
  sed -i "s/ @ [0-9]\+//" deckfile
 ```
 - Use `--terse` to get a less noisy menu/prompt
-- To change the number of boxes or box expiry times, just modify this list in `deck.py`:
+- To change the number of boxes or box expiry times, just modify this list in `deck.py`. (Please note that the last box never expires, so the actual expiry value of the last list element doesn't really matter.):
 ```
 default_expiries_days = [0, 2, 10, 30, 90, -1]
 ```
-Please note that the last box never expires, so the actual expiry value of the last list element doesn't really matter.
