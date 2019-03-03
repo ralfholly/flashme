@@ -66,25 +66,13 @@ You can specify deckfile search paths via the `FLASHME_DIR` environment variable
 
 ## Notification When Cards Have Expired
 
-Personally, I prefer to manually check for expired cards every once in a while. However, here's a simple solution for you if you want to get notified when cards have expired. Run a check regularly (e. g. every hour as a cron user job) and display a notification whenever an interactive shell is opened:
-
+Personally, I prefer to manually check for expired cards every once in a while. However, here's a simple solution for you if you want to get automatically notified. Run `utils/flashme_notify.sh` regularly (e. g. every hour as a cron user job); if cards are due for repetition, you will get a pop-up message showing which decks have expired cards:
 ```
 $ crontab -e
-@hourly /opt/flashme/flashme.sh --expired english-german french-german linux-tips > ~/.flashme.expired
+FLASHME_DIR=/home/ralf/flashme.decks
+@hourly ~/flashme/utils/flashme_notify.sh english latin french linux-tips
 ```
-```
-$ vi ~/.bashrc
-FLASHME_EXPIRED_FILE=~/.flashme.expired
-if [ -s $FLASHME_EXPIRED_FILE ]; then
-    echo "Expired Flashme decks:"
-    echo "----------------------"
-    cat $FLASHME_EXPIRED_FILE
-    # Notify only once per hour:
-    rm -f $FLASHME_EXPIRED_FILE
-fi
-```
-
-Of course, it's even simpler if you run the check directly (every time) in `.bashrc` but this might mean you have to wait a couple of seconds until the prompt appears. A more sophisticated approach would utilize the `PROMPT_COMMAND` environment variable to show an nice "expired" indicator.  Let me know if you have come up with something clever!
+`flashme_notify.sh` uses `notify-send(1)` to display GUI pop-ups. If that's not available to you, you could employ `sendmail` to send you a reminder email instead. Another option is to utilize the `PROMPT_COMMAND` environment variable and show a nice "expired" indicator in your prompt.
 
 ## Tips and Tricks
 
