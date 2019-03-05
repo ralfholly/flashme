@@ -70,7 +70,7 @@ Personally, I prefer to manually check for expired cards every once in a while. 
 ```
 $ crontab -e
 FLASHME_DIR=/home/ralf/flashme.decks
-@hourly ~/flashme/utils/flashme_notify.sh english latin french linux-tips
+@hourly /home/ralf/flashme/utils/flashme_notify.sh english latin french linux-tips
 ```
 `flashme_notify.sh` uses `notify-send(1)` to display GUI pop-ups. If that's not available to you, you could employ `sendmail` to send you a reminder email instead. Another option is to utilize the `PROMPT_COMMAND` environment variable and show a nice "expired" indicator in your prompt.
 
