@@ -94,3 +94,4 @@ sed -i "s/ # 5 / # 0 /" deckfile
 ```
 default_expiries_days = [0, 2, 10, 30, 90, -1]
 ```
+- Use `--reverse` to present the card back as question and the front as answer.
