@@ -7,6 +7,8 @@
 
 import argparse
 import sys
+import os
+import subprocess
 
 from deck import Deck, SECS_PER_DAY
 from view import View
@@ -20,7 +22,7 @@ class Flashme:
     """
     def __init__(self):
         parser = argparse.ArgumentParser(description="A flashcard system for command-line aficionados")
-        parser.add_argument("file", nargs="?", type=str, default=None, metavar="DECKFILE", help="Flashcard file to be used")
+        parser.add_argument("file", nargs="?", type=str, default=None, metavar="DECKFILE", help="Flashcard deckfile to be used")
         parser.add_argument("-v", "--version", action="store_true", help="Show flashcard version")
         parser.add_argument(
             "-c", "--cram", nargs="?", type=int, const=-1, metavar="N",
@@ -29,7 +31,8 @@ class Flashme:
         parser.add_argument("-t", "--terse", action="store_true", help="Terse output style")
         parser.add_argument("-s", "--silent-start", action="store_true", help="Silently exit if no cards have expired")
         parser.add_argument("-r", "--reverse", action="store_true", help="Reverse learning: show back and ask for front")
-        parser.add_argument("-e", "--expired", nargs="+", type=str, default=None, metavar="DECKFILE", help="List count of expired cards for given deckfiles")
+        parser.add_argument("-e", "--edit", action="store_true", help="Edit deckfile with editor defined by EDITOR variable")
+        parser.add_argument("-x", "--expired", nargs="+", type=str, default=None, metavar="DECKFILE", help="List count of expired cards for given deckfiles")
         self.args = parser.parse_args()
 
         self.view = View(self.args.terse, self.args.reverse)
@@ -37,6 +40,9 @@ class Flashme:
         if self.args.version:
             print(self.view.print_version(VERSION))
             sys.exit(0)
+
+        if self.args.edit:
+            self.launch_editor(self.args.file)
 
         if self.args.expired:
             print(self.view.print_expired_counts(Flashme.get_expired_counts(self.args.expired)), end="")
@@ -123,6 +129,18 @@ class Flashme:
         else:
             View.die("Cram box number must be in range -1 .. " + str(self.deck.max_box_num))
         return None
+
+    def launch_editor(self, deckfile):
+        editor = os.environ.get("EDITOR")
+        if not editor:
+            View.die("EDITOR environment variable not defined")
+        deckfile = Deck.locate_file(self.args.file)
+        if not deckfile:
+            View.die("Deckfile " + self.args.file + " doesn't exist")
+        try:
+            subprocess.run((editor, deckfile))
+        except FileNotFoundError:
+            View.die("Failed to launch editor " + editor)
 
     @staticmethod
     def get_expired_counts(deckfiles):
