@@ -1,5 +1,9 @@
 # flashme -- Flashcards for command-line aficionados
 
+## History
+
+1.0.0  2019-03-29 NEW   Initial release.
+
 ## Introduction
 
 I felt compelled to write `flashme` because I couldn't find anything like it. While there are many freeware flashcard programs out there, none met my chief requirement: it must be fully operable from the command-line. My next most important requirement was that cards must be kept in plain text files (so-called deckfiles): I want to be able to diff, grep, and edit deckfiles with standard Unix command-line tools and editors. Binary file formats, including zipped XML files, are a plain nuisance and make it difficult to store flashcards in version control systems.
