@@ -3,6 +3,7 @@
 ## History
 
 1.0.0  2019-03-29 NEW   Initial release.
+1.1.0  2019-11-06 NEW   Added support for '#' comments in deckfiles.
 
 ## Introduction
 
@@ -48,6 +49,10 @@ This card is in box 3 (the fourth box) and was entered on 2019-02-22 09:02:28 UT
 $ date --date "@1550826208" --utc
 Fri Feb 22 09:03:28 UTC 2019
 ```
+
+## Comments
+
+If a line in a deckfile starts with a pound character `#` the line is ignored. Comments are useful for disabling certain cards without having to delete them.
 
 `\n` character sequences within `<front>` or `<back>` will be replaced with line breaks. This way, your cards can span multiple lines.
 

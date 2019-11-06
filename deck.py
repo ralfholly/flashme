@@ -23,6 +23,7 @@ class Deck:
     default_expiries_days = [0, 2, 10, 30, 90, -1]
     default_expiries = [(SECS_PER_DAY) * expiry_days for expiry_days in default_expiries_days]
     flashme_dir_env_string = "FLASHME_DIR"
+    comment_leader = "#"
 
     def __init__(self, expiries=default_expiries, filename=None, **kwargs):
         self.box_count = len(expiries)
@@ -37,6 +38,7 @@ class Deck:
         self.boxes = [[] for _ in range(self.box_count)]
         self.current_box_index = 0
         self.current_card_index = None
+        self.comments = []
 
         if filename:
             self.filename = Deck.locate_file(filename)
@@ -44,10 +46,14 @@ class Deck:
                 raise Deck.DeckfileNotFoundError("Flashcard file does not exist or is not accessible")
 
     def load_from_specs(self, card_specs):
-        for card_spec in card_specs:
-            clean_card_spec = card_spec.rstrip()
-            if clean_card_spec:
-                card = FlashCard.from_card_spec(clean_card_spec)
+        for line in card_specs:
+            # Handle comments.
+            if line.startswith(Deck.comment_leader):
+                self.comments.append(line)
+                continue
+            card_spec = line.rstrip()
+            if card_spec:
+                card = FlashCard.from_card_spec(card_spec)
                 if card:
                     if 0 <= card.box <= self.max_box_num:
                         self.boxes[card.box].append(card)
@@ -152,6 +158,8 @@ class Deck:
     def save_to_file(self):
         if self.filename and self.modified:
             with open(self.filename, "w") as f:
+                for comment in self.comments:
+                    f.write(comment)
                 for box in self.boxes:
                     for card in box:
                         f.write(card.to_card_spec())
