@@ -50,11 +50,11 @@ $ date --date "@1550826208" --utc
 Fri Feb 22 09:03:28 UTC 2019
 ```
 
+`\n` character sequences within `<front>` or `<back>` will be replaced with line breaks. This way, your cards can span multiple lines.
+
 ## Comments
 
 If a line in a deckfile starts with a pound character `#` the line is ignored. Comments are useful for disabling certain cards without having to delete them.
-
-`\n` character sequences within `<front>` or `<back>` will be replaced with line breaks. This way, your cards can span multiple lines.
 
 ## Regular Learning vs. Cramming
 
