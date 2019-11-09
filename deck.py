@@ -38,7 +38,7 @@ class Deck:
         self.boxes = [[] for _ in range(self.box_count)]
         self.current_box_index = 0
         self.current_card_index = None
-        self.comments = []
+        self.deckfile_lines = []
 
         if filename:
             self.filename = Deck.locate_file(filename)
@@ -49,7 +49,7 @@ class Deck:
         for line in card_specs:
             # Handle comments.
             if line.startswith(Deck.comment_leader):
-                self.comments.append(line)
+                self.deckfile_lines.append(line)
                 continue
             card_spec = line.rstrip()
             if card_spec:
@@ -59,6 +59,7 @@ class Deck:
                         self.boxes[card.box].append(card)
                     else:
                         raise Deck.CardSpecError("Box number out of range: " + card_spec)
+                    self.deckfile_lines.append(card)
                 else:
                     raise Deck.CardSpecError("Malformed card spec: " + card_spec)
 
@@ -158,12 +159,14 @@ class Deck:
     def save_to_file(self):
         if self.filename and self.modified:
             with open(self.filename, "w") as f:
-                for comment in self.comments:
-                    f.write(comment)
-                for box in self.boxes:
-                    for card in box:
-                        f.write(card.to_card_spec())
+                for deckfile_line in self.deckfile_lines:
+                    if isinstance(deckfile_line, FlashCard):
+                        f.write(deckfile_line.to_card_spec())
                         f.write("\n")
+                    elif isinstance(deckfile_line, str):
+                        f.write(deckfile_line)
+                    else:
+                        pass
 
     @staticmethod
     def locate_file(filename):
