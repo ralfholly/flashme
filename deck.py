@@ -47,12 +47,11 @@ class Deck:
 
     def load_from_specs(self, card_specs):
         for line in card_specs:
-            # Handle comments.
-            if line.startswith(Deck.comment_leader):
-                self.deckfile_lines.append(line)
-                continue
             card_spec = line.rstrip()
-            if card_spec:
+            # Handle empty lines and comments.
+            if not card_spec or card_spec.startswith(Deck.comment_leader):
+                self.deckfile_lines.append(card_spec)
+            else:
                 card = FlashCard.from_card_spec(card_spec)
                 if card:
                     if 0 <= card.box <= self.max_box_num:
@@ -161,10 +160,9 @@ class Deck:
             with open(self.filename, "w") as f:
                 for deckfile_line in self.deckfile_lines:
                     if isinstance(deckfile_line, FlashCard):
-                        f.write(deckfile_line.to_card_spec())
-                        f.write("\n")
+                        f.write(deckfile_line.to_card_spec() + "\n")
                     elif isinstance(deckfile_line, str):
-                        f.write(deckfile_line)
+                        f.write(deckfile_line + "\n")
                     else:
                         pass
 

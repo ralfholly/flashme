@@ -14,7 +14,7 @@ from deck import Deck, SECS_PER_DAY
 from view import View
 from controller import Controller
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 
 class Flashme:
     """ Main program entry point.
