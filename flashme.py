@@ -14,7 +14,7 @@ from deck import Deck, SECS_PER_DAY
 from view import View
 from controller import Controller
 
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 
 class Flashme:
     """ Main program entry point.
@@ -138,8 +138,8 @@ class Flashme:
         if not deckfile:
             View.die("Deckfile " + self.args.file + " doesn't exist")
         try:
-            subprocess.run((editor, deckfile))
-        except FileNotFoundError:
+            subprocess.run(editor, deckfile, check=True)
+        except (FileNotFoundError, subprocess.CalledProcessError):
             View.die("Failed to launch editor " + editor)
 
     @staticmethod
