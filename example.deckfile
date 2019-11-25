@@ -1,0 +1,25 @@
+# This is a little example deckfile containing English words
+# and their German equivalent.
+
+# Colors
+
+red : rot
+blue : blau
+green : grün
+black : schwarz
+white : weiß
+brown : braun
+yellow : gelb
+cyan : türkis
+magenta : rosa
+amber : bernstein
+
+# Numbers
+
+one : Eins
+two : Zwei
+three : Drei
+
+# A multi-line card
+
+Walled up in the earth so steady\nBurned from clay, the mould doth stand : Fest gemauert in der Erden\nSteht die Form, aus Lehm gebrannt
