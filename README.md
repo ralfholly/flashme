@@ -1,13 +1,5 @@
 # flashme -- Flashcards for command-line aficionados
 
-## History
-
-1.0.0  2019-03-29 NEW   Initial release.  
-1.1.0  2019-11-06 NEW   Added support for '#' comments in deckfiles.  
-1.2.0  2019-11-09 NEW   Preserve deckfile order upon saving.  
-1.2.1  2019-11-13 FIX   Preserve even empty lines upon saving.  
-1.2.2  2019-11-13 FIX   Remove pylint warning.  
-
 ## Introduction
 
 I felt compelled to write `flashme` because I couldn't find anything like it. While there are many freeware flashcard programs out there, none met my chief requirement: it must be fully operable from the command-line. My next most important requirement was that cards are stored in plain text files (I call them "deckfiles"): I want to be able to diff, grep, and edit deckfiles with standard Unix command-line tools and editors. Binary file formats, including zipped XML files, are a nuisance and make it difficult to store flashcards in version control systems.
@@ -107,3 +99,11 @@ sed -i "s/ # 5 / # 0 /" deckfile
 default_expiries_days = [0, 2, 10, 30, 90, -1]
 ```
 - Use `--reverse` to present the card back as question and the front as answer.
+
+## History
+
+  1.0.0  2019-03-29 NEW   Initial release.
+  1.1.0  2019-11-06 NEW   Added support for '#' comments in deckfiles.
+  1.2.0  2019-11-09 NEW   Preserve deckfile order upon saving.
+  1.2.1  2019-11-13 FIX   Preserve even empty lines upon saving.
+  1.2.2  2019-11-13 FIX   Remove pylint warning.
