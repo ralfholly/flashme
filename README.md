@@ -107,5 +107,5 @@ default_expiries_days = [0, 2, 10, 30, 90, -1]
 1.1.0  2019-11-06 NEW   Added support for '#' comments in deckfiles.
 1.2.0  2019-11-09 NEW   Preserve deckfile order upon saving.
 1.2.1  2019-11-13 FIX   Preserve even empty lines upon saving.
-```
 1.2.2  2019-11-13 FIX   Remove pylint warning.
+```
