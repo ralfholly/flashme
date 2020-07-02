@@ -31,6 +31,7 @@ class Deck:
         self.expiries = expiries
         self.filename = None
         self.modified = False
+        self.cram_list = []
 
         self.time_fun = kwargs['time_fun'] if 'time_fun' in kwargs else lambda: int(time.time())
 
@@ -76,7 +77,7 @@ class Deck:
         return time_fun() - card.timestamp >= self.expiries[card.box] \
             if card.box < self.max_box_num else False
 
-    def get_next_card(self, consume=True):
+    def get_next_card(self, consume=False):
         starting_box = self.current_box_index
         while True:
             for current_card_index, card in enumerate(self.boxes[self.current_box_index]):
@@ -92,23 +93,28 @@ class Deck:
         self.current_card_index = None
         return None
 
-    def get_next_card_cram_mode(self, cram=None, consume=True):
+    def get_next_card_cram_mode(self, cram=None, consume=False):
         assert cram is not None
-        self.current_box_index = -1
-        # Note! In cram mode we even present cards from the last box.
-        if cram == -1:
-            while self.current_box_index == -1:
-                box_index = random.randint(0, self.max_box_num)
-                if self.boxes[box_index]:
-                    self.current_box_index = box_index
-        else:
-            self.current_box_index = cram
+        card = None
+        self.current_card_index = None
 
-        assert self.boxes[self.current_box_index]
-        self.current_card_index = random.randint(0, len(self.boxes[self.current_box_index]) - 1)
-        card = self.boxes[self.current_box_index][self.current_card_index]
-        if consume:
-            self.consume_current_card()
+        if not self.cram_list:
+            # Note! In cram mode we even present cards from the last box.
+            if cram == -1:
+                for box_index in range(0, self.max_box_num):
+                    if self.boxes[box_index]:
+                        for card_index in range(0, len(self.boxes[box_index])):
+                            self.cram_list.append((box_index, card_index))
+            else:
+                for card_index in range(0, len(self.boxes[cram])):
+                    self.cram_list.append((cram, card_index))
+            random.shuffle(self.cram_list)
+
+        if self.cram_list:
+            self.current_box_index, self.current_card_index = self.cram_list.pop()
+            card = self.boxes[self.current_box_index][self.current_card_index]
+            if consume:
+                self.consume_current_card()
         return card
 
     def consume_current_card(self):
