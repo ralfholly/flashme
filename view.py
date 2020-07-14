@@ -5,9 +5,10 @@ import sys
 class View:
     """ This class is responsible for displaying information to the user. """
 
-    def __init__(self, terse, reverse):
+    def __init__(self, terse, reverse, cram):
         self.terse = terse
         self.reverse = reverse
+        self.cram = cram
 
     def print_question(self, card):
         front = "Q: " + View.replace_escapes(card.front if not self.reverse else card.back)
@@ -17,7 +18,7 @@ class View:
 
     def print_answer(self, card):
         back = "A: " + View.replace_escapes(card.back if not self.reverse else card.front)
-        if not self.terse:
+        if not (self.terse or self.cram):
             back += "\n"
         return back
 
@@ -43,7 +44,9 @@ class View:
     def print_input(self, card_back):
         out = ""
         if not self.terse:
-            out = "(Y)es (N)o (I)nfo (Q)uit (C)ancel"
+            out = "(I)nfo (Q)uit (C)ancel"
+            if not self.cram:
+                out = "(Y)es (N)o " + out
             if card_back:
                 out = "[A]nswer " + out
         return out + " "

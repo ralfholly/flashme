@@ -14,7 +14,7 @@ from deck import Deck, SECS_PER_DAY
 from view import View
 from controller import Controller
 
-VERSION = "1.2.3"
+VERSION = "1.3.0"
 
 class Flashme:
     """ Main program entry point.
@@ -35,7 +35,7 @@ class Flashme:
         parser.add_argument("-x", "--expired", nargs="+", type=str, default=None, metavar="DECKFILE", help="List count of expired cards for given deckfiles")
         self.args = parser.parse_args()
 
-        self.view = View(self.args.terse, self.args.reverse)
+        self.view = View(self.args.terse, self.args.reverse, self.args.cram)
 
         if self.args.version:
             print(self.view.print_version(VERSION))
@@ -65,7 +65,7 @@ class Flashme:
             sys.exit(0)
 
         if self.args.cram is None:
-            self.get_next_card_fun = lambda: self.deck.get_next_card(consume=False)
+            self.get_next_card_fun = self.deck.get_next_card
         else:
             self.get_next_card_fun = self.init_cram_mode()
 
@@ -101,7 +101,11 @@ class Flashme:
                 if result[0] == Controller.input_info:
                     print(self.view.print_info(self.deck.get_statistics()))
                 elif result[0] == Controller.input_show:
-                    print(self.view.print_answer(my_card), end="")
+                    print(self.view.print_answer(my_card), end="" if not self.args.cram else " ")
+                    # In cram mode, wait for return key press then proceed to next question.
+                    if self.args.cram:
+                        input()
+                        break
                 elif result[0] == Controller.input_cancel:
                     my_inp = input(self.view.print_input_cancel_check()).upper()
                     if my_inp == Controller.input_yes:
@@ -125,7 +129,7 @@ class Flashme:
                     View.die("Box %d is empty" % self.args.cram)
                 cram_box_str = "box " + str(self.args.cram)
             print("CRAMMING (%s)" % cram_box_str)
-            return lambda: self.deck.get_next_card_cram_mode(cram=self.args.cram, consume=False)
+            return lambda: self.deck.get_next_card_cram_mode(cram=self.args.cram)
         else:
             View.die("Cram box number must be in range -1 .. " + str(self.deck.max_box_num))
         return None

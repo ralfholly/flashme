@@ -28,8 +28,10 @@ class Controller:
                 self.deck.right(card)
             retval = (inp, None)
         elif inp == Controller.input_no:
-            self.deck.consume_current_card()
-            self.deck.wrong(card)
+            # No demotion in cram mode.
+            if self.cram is None:
+                self.deck.consume_current_card()
+                self.deck.wrong(card)
             retval = (inp, None)
         elif inp == Controller.input_show:
             retval = (inp, card.back)

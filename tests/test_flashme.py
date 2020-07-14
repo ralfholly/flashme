@@ -24,13 +24,13 @@ class TestFlashMe(unittest.TestCase):
         deck.insert_card(FlashCard("q2", "a2"), 0)
         deck.insert_card(FlashCard("q3", "a3"), 0)
         deck.insert_card(FlashCard("q6", "a6"), 2)
-        self.assertEqual("q1", deck.get_next_card().front)
-        self.assertEqual("q2", deck.get_next_card().front)
-        self.assertEqual("q3", deck.get_next_card().front)
-        self.assertEqual("q4", deck.get_next_card().front)
-        self.assertEqual("q5", deck.get_next_card().front)
-        self.assertEqual("q6", deck.get_next_card().front)
-        self.assertEqual(None, deck.get_next_card())
+        self.assertEqual("q1", deck.get_next_card(consume=True).front)
+        self.assertEqual("q2", deck.get_next_card(consume=True).front)
+        self.assertEqual("q3", deck.get_next_card(consume=True).front)
+        self.assertEqual("q4", deck.get_next_card(consume=True).front)
+        self.assertEqual("q5", deck.get_next_card(consume=True).front)
+        self.assertEqual("q6", deck.get_next_card(consume=True).front)
+        self.assertEqual(None, deck.get_next_card(consume=True))
 
     def test_get_next_card_with_timestamp(self):
         expiries = [0, 1, 2, 3, 4, 100]
@@ -42,35 +42,35 @@ class TestFlashMe(unittest.TestCase):
         deck.insert_card(FlashCard("q3", "a3", timestamp=7000), 0)
         deck.insert_card(FlashCard("q6", "a6", timestamp=10000), 2)
         deck.time_fun = lambda: 8001
-        self.assertEqual("q2", deck.get_next_card().front)
-        self.assertEqual("q3", deck.get_next_card().front)
-        self.assertEqual("q4", deck.get_next_card().front)
-        self.assertEqual("q5", deck.get_next_card().front)
-        self.assertEqual(None, deck.get_next_card())
+        self.assertEqual("q2", deck.get_next_card(consume=True).front)
+        self.assertEqual("q3", deck.get_next_card(consume=True).front)
+        self.assertEqual("q4", deck.get_next_card(consume=True).front)
+        self.assertEqual("q5", deck.get_next_card(consume=True).front)
+        self.assertEqual(None, deck.get_next_card(consume=True))
         deck.time_fun = lambda: 10000
-        self.assertEqual("q1", deck.get_next_card().front)
-        self.assertEqual(None, deck.get_next_card())
-        self.assertEqual(None, deck.get_next_card())
-        self.assertEqual(None, deck.get_next_card())
+        self.assertEqual("q1", deck.get_next_card(consume=True).front)
+        self.assertEqual(None, deck.get_next_card(consume=True))
+        self.assertEqual(None, deck.get_next_card(consume=True))
+        self.assertEqual(None, deck.get_next_card(consume=True))
         deck.time_fun = lambda: 10001
-        self.assertEqual(None, deck.get_next_card())
+        self.assertEqual(None, deck.get_next_card(consume=True))
         deck.time_fun = lambda: 10002
-        self.assertEqual("q6", deck.get_next_card().front)
-        self.assertEqual(None, deck.get_next_card())
+        self.assertEqual("q6", deck.get_next_card(consume=True).front)
+        self.assertEqual(None, deck.get_next_card(consume=True))
         deck.insert_card(FlashCard("q7", "a7", timestamp=10002), 0)
-        self.assertEqual("q7", deck.get_next_card().front)
-        self.assertEqual(None, deck.get_next_card())
+        self.assertEqual("q7", deck.get_next_card(consume=True).front)
+        self.assertEqual(None, deck.get_next_card(consume=True))
 
     def test_wrong(self):
         deck = Deck()
         deck.insert_card(FlashCard("q3", "a3"), 3)
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual(3, card.box)
         deck.wrong(card)
         self.assertEqual(0, card.box)
         card.timestamp = 0
         deck.restart()
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         card.timestamp = 0
         self.assertEqual(0, card.box)
         self.assertEqual("q3", card.front)
@@ -78,11 +78,11 @@ class TestFlashMe(unittest.TestCase):
     def test_right(self):
         deck = Deck()
         deck.insert_card(FlashCard("q3", "a3"), 3)
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual(3, card.box)
         deck.right(card)
         card.timestamp = 0
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual(4, card.box)
         self.assertEqual("q3", card.front)
         # Cannot promote card beyond last box.
@@ -118,16 +118,16 @@ class TestFlashMe(unittest.TestCase):
         expiries = [0, 1, 2, 3, 4, 100]
         deck = Deck(expiries)
         deck.time_fun = lambda: 1000
-        self.assertEqual(None, deck.get_next_card())
+        self.assertEqual(None, deck.get_next_card(consume=True))
         deck.insert_card(FlashCard("q1", "a1", timestamp=1000), 0)
 
         # Card in box 0, right answer, move to 1
         deck.time_fun = lambda: 1001
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual("q1", card.front)
         deck.wrong(card)
         self.assertEqual(1001, card.timestamp)
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual("q1", card.front)
         self.assertEqual(1001, card.timestamp)
         deck.time_fun = lambda: 1002
@@ -136,31 +136,31 @@ class TestFlashMe(unittest.TestCase):
         self.assertEqual(1002, card.timestamp)
 
         # Card now in box 1, right answer, move to 2
-        card = deck.get_next_card()
-        self.assertEqual(None, deck.get_next_card())
+        card = deck.get_next_card(consume=True)
+        self.assertEqual(None, deck.get_next_card(consume=True))
         # .. Expire
         deck.time_fun = lambda: 1003
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual("q1", card.front)
         deck.right(card)
         self.assertEqual(2, card.box)
         self.assertEqual(1003, card.timestamp)
 
         # Card now in box 2, wrong answer, move to 0
-        card = deck.get_next_card()
-        self.assertEqual(None, deck.get_next_card())
+        card = deck.get_next_card(consume=True)
+        self.assertEqual(None, deck.get_next_card(consume=True))
         deck.time_fun = lambda: 1004
-        card = deck.get_next_card()
-        self.assertEqual(None, deck.get_next_card())
+        card = deck.get_next_card(consume=True)
+        self.assertEqual(None, deck.get_next_card(consume=True))
         deck.time_fun = lambda: 1005
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual("q1", card.front)
         deck.wrong(card)
         self.assertEqual(0, card.box)
         self.assertEqual(1005, card.timestamp)
 
         # Card now in box 0, wrong answer, stay in box 0
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual("q1", card.front)
         deck.wrong(card)
         self.assertEqual(0, card.box)
@@ -170,12 +170,12 @@ class TestFlashMe(unittest.TestCase):
         expiries = [0, 1, 2, 3, 4, 100]
         deck = Deck(expiries)
         deck.time_fun = lambda: 1000
-        self.assertEqual(None, deck.get_next_card())
+        self.assertEqual(None, deck.get_next_card(consume=True))
         deck.insert_card(FlashCard("q1", "a1", timestamp=1000), 4)
 
         # Card in box 4, right answer, move to 5
         deck.time_fun = lambda: 1004
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual("q1", card.front)
         deck.right(card)
         self.assertEqual(5, card.box)
@@ -183,7 +183,7 @@ class TestFlashMe(unittest.TestCase):
 
         # Card in last box. Never expires, never presented.
         deck.time_fun = lambda: 1500
-        card = deck.get_next_card()
+        card = deck.get_next_card(consume=True)
         self.assertEqual(None, card)
 
     def test_get_statistics(self):
