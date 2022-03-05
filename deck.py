@@ -98,10 +98,12 @@ class Deck:
         card = None
         self.current_card_index = None
 
+        # If cram list is empty (or has become empty), create a fresh random
+        # cram list.
         if not self.cram_list:
             # Note! In cram mode we even present cards from the last box.
             if cram == -1:
-                for box_index in range(0, self.max_box_num):
+                for box_index in range(self.box_count):
                     if self.boxes[box_index]:
                         for card_index in range(0, len(self.boxes[box_index])):
                             self.cram_list.append((box_index, card_index))
